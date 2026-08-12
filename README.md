@@ -1,6 +1,19 @@
 # Swarm Survivors
 
-A Vampire Survivors-style arena roguelike built with TypeScript + WebGL2, made for our computer graphics course. The whole game is a GPU showcase: thousands of instanced enemies, particles, and shaders at 60fps.
+**Outlast the swarm in this WebGL2 arena roguelike.**
+
+A Vampire Survivors-style horde survival game built with TypeScript + raw WebGL2, made for our computer graphics course. The whole game is a GPU showcase: every sprite drawn in a single instanced draw call, simulation ticking at a fixed 120Hz.
+
+**Play now:** [seyamalam.itch.io/swarm-survivors](https://seyamalam.itch.io/swarm-survivors) (HTML5, runs in browser) — or grab desktop builds for Windows/macOS/Linux.
+
+## Features
+
+- **Single-draw-call rendering** — all sprites (player, enemies, projectiles, grid, UI bars) batched into one `drawArraysInstanced` call via WebGL2
+- **Fixed 120Hz simulation** — accumulator-based timestep decoupled from render rate; identical gameplay on any display, with a live FPS counter in the HUD
+- **Escalating horde** — spawn interval decays from 0.7s to 0.07s; three enemy archetypes (crawler, runner, brute) with distinct speed/size/HP
+- **Auto-fire combat** — nearest-target bolt weapon, contact damage, HP bar, death → game over → instant retry
+- **Content-as-data** — enemies and weapons are pure JSON in `src/data/`, no engine knowledge needed to add more
+- **Zero-dependency game code** — no engine, no framework; TypeScript straight to WebGL2 (~10KB gzipped)
 
 ## Screenshots
 
@@ -74,12 +87,14 @@ The codebase is split so each member owns a separable area:
 ## Roadmap / scope guardrails
 
 - [x] Instanced WebGL2 quad renderer (one draw call for all sprites)
+- [x] Fixed 120Hz simulation with FPS counter
 - [x] Game loop, input, camera-follow, basic enemy spawning/seeking
+- [x] Auto-firing weapons driven by `src/data/weapons.json`
+- [x] HUD + menus
 - [ ] Spatial hash grid for collision (naive O(n²) dies ~1k enemies — this is the CG talking point)
-- [ ] Auto-firing weapons driven by `src/data/weapons.json`
+- [ ] Multiple simultaneous weapons + upgrades
 - [ ] XP gems, leveling, 3-card upgrade draft
 - [ ] Particle system + damage numbers
-- [ ] HUD + menus
 - [ ] One boss wave at 10 minutes
 
 **Explicitly out of scope:** meta-progression saves, multiple stages/characters, online anything.
