@@ -1,9 +1,19 @@
+const SIM_HZ = 120;
+const STEP = 1 / SIM_HZ;
+const MAX_FRAME = 0.25;
+
 export function startLoop(update: (dt: number) => void, render: () => void) {
   let last = performance.now();
+  let acc = 0;
   const frame = (now: number) => {
-    const dt = Math.min((now - last) / 1000, 0.1);
+    let elapsed = (now - last) / 1000;
     last = now;
-    update(dt);
+    if (elapsed > MAX_FRAME) elapsed = MAX_FRAME;
+    acc += elapsed;
+    while (acc >= STEP) {
+      update(STEP);
+      acc -= STEP;
+    }
     render();
     requestAnimationFrame(frame);
   };

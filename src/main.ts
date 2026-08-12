@@ -45,6 +45,10 @@ showMenu();
 
 const GRID_SPACING = 160;
 
+let fpsFrames = 0;
+let fpsLast = performance.now();
+let fps = 0;
+
 startLoop(
   (dt) => {
     if (state === "playing" && world) {
@@ -56,6 +60,13 @@ startLoop(
     }
   },
   () => {
+    fpsFrames++;
+    const now = performance.now();
+    if (now - fpsLast >= 500) {
+      fps = Math.round((fpsFrames * 1000) / (now - fpsLast));
+      fpsFrames = 0;
+      fpsLast = now;
+    }
     renderer.resize();
     const camX = world?.playerX ?? 0;
     const camY = world?.playerY ?? 0;
@@ -127,7 +138,7 @@ startLoop(
         });
       }
 
-      hud.textContent = `hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
+      hud.textContent = `fps: ${fps} (sim 120Hz) | hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
     }
 
     renderer.flush();
