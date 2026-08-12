@@ -23,7 +23,8 @@
     "package:mac": "electron-builder --config electron-builder.yml --mac --x64 --arm64 --publish never",
     "package:linux": "electron-builder --config electron-builder.yml --linux --x64 --publish never",
     "deploy:itch:web": "bash scripts/publish-itch-web.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "screenshots": "node scripts/capture-screenshots.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -35,6 +36,7 @@
     "globals": "^17.11.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
+    "playwright": "^1.62.1",
     "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.67.0",

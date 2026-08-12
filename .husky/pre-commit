@@ -1,3 +1,6 @@
+if [ "$SKIP_SCREENSHOTS" != "1" ]; then
+  npm run screenshots && git add docs/screenshots || echo "warn: screenshot capture failed, continuing without updating screenshots"
+fi
 npx lint-staged
 npm run typecheck
 npm run lint

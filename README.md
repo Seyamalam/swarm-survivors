@@ -2,6 +2,14 @@
 
 A Vampire Survivors-style arena roguelike built with TypeScript + WebGL2, made for our computer graphics course. The whole game is a GPU showcase: thousands of instanced enemies, particles, and shaders at 60fps.
 
+## Screenshots
+
+Refreshed automatically on every commit by the pre-commit hook (`scripts/capture-screenshots.mjs`, headless Playwright against the production build). Skip for one commit with `SKIP_SCREENSHOTS=1 git commit ...`.
+
+| Menu                                    | Gameplay                                   |
+| --------------------------------------- | ------------------------------------------ |
+| ![Main menu](docs/screenshots/menu.png) | ![Gameplay](docs/screenshots/gameplay.png) |
+
 ## Quick start
 
 ```bash
