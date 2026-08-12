@@ -26,7 +26,9 @@ npm run preview   # serve the production build locally
 npm run deploy:itch:web   # builds dist/ and pushes with butler
 ```
 
-Requires the [butler CLI](https://itch.io/docs/butler/) on PATH and `BUTLER_API_KEY` in the environment or `.env.local`. Set `ITCH_TARGET=user/page:html5` to override the default target. Or do it manually: zip the **contents** of `dist/` (index.html at zip root) → itch.io → New project → Kind: **HTML** → check "This file will be played in the browser".
+Requires the [butler CLI](https://itch.io/docs/butler/) on PATH and either a prior `butler login` or `BUTLER_API_KEY` in the environment or `.env.local`. Set `ITCH_TARGET=user/page:html5` to override the default target. Every successful local commit is automatically built and pushed to the `html5` channel by the Husky post-commit hook.
+
+Before each commit, Husky formats and lints staged files, then runs the full TypeScript typecheck and ESLint suite. If any check fails, the commit is stopped.
 
 **Desktop downloads (Electron):**
 
@@ -40,24 +42,24 @@ Artifacts land in `release/desktop/`. Upload them to the same itch page as downl
 
 ## Development
 
-| Command | What it does |
-|---------|-------------|
-| `npm run dev` | Run the game in the browser (fastest iteration) |
-| `npm run desktop:dev` | Electron with Vite hot-reload |
-| `npm run desktop` | Electron against the built `dist/` |
-| `npm run build` | Production web build to `dist/` |
-| `npm run package:win/mac/linux` | Package desktop apps to `release/desktop/` |
+| Command                         | What it does                                    |
+| ------------------------------- | ----------------------------------------------- |
+| `npm run dev`                   | Run the game in the browser (fastest iteration) |
+| `npm run desktop:dev`           | Electron with Vite hot-reload                   |
+| `npm run desktop`               | Electron against the built `dist/`              |
+| `npm run build`                 | Production web build to `dist/`                 |
+| `npm run package:win/mac/linux` | Package desktop apps to `release/desktop/`      |
 
 ## Team structure
 
 The codebase is split so each member owns a separable area:
 
-| Area | Path | Owner | What it is |
-|------|------|-------|-----------|
-| Engine core | `src/engine/` | Member 1 | Instanced sprite renderer, game loop, input, (next: spatial hash collision, object pooling) |
-| Content & balance | `src/data/` | Member 2 | Enemies, weapons, upgrades, waves — pure JSON, no engine knowledge needed |
-| VFX & juice | `src/game/vfx/` | Member 3 | Particles, damage numbers, hit flashes, screen shake |
-| UI & menus | `src/ui/` | Member 4 | HUD, upgrade draft screen, main menu, game-over stats |
+| Area              | Path            | Owner    | What it is                                                                                  |
+| ----------------- | --------------- | -------- | ------------------------------------------------------------------------------------------- |
+| Engine core       | `src/engine/`   | Member 1 | Instanced sprite renderer, game loop, input, (next: spatial hash collision, object pooling) |
+| Content & balance | `src/data/`     | Member 2 | Enemies, weapons, upgrades, waves — pure JSON, no engine knowledge needed                   |
+| VFX & juice       | `src/game/vfx/` | Member 3 | Particles, damage numbers, hit flashes, screen shake                                        |
+| UI & menus        | `src/ui/`       | Member 4 | HUD, upgrade draft screen, main menu, game-over stats                                       |
 
 > Add names to the table once assigned. Each member's demo contribution should be visible in the final video and summarized in the grading writeup below.
 

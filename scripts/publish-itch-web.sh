@@ -27,8 +27,10 @@ if [[ -z "${BUTLER_API_KEY:-}" && -f .env.local ]]; then
   set +a
 fi
 
-if [[ -z "${BUTLER_API_KEY:-}" ]]; then
-  echo "BUTLER_API_KEY is required in the environment or .env.local." >&2
+readonly BUTLER_IDENTITY="${BUTLER_IDENTITY:-$HOME/Library/Application Support/itch/butler_creds}"
+
+if [[ -z "${BUTLER_API_KEY:-}" && ! -f "$BUTLER_IDENTITY" ]]; then
+  echo "Authenticate first with 'butler login' or set BUTLER_API_KEY in the environment or .env.local." >&2
   exit 1
 fi
 

@@ -12,6 +12,8 @@
     "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "build": "tsc && vite build",
     "build:web": "npm run build",
+    "lint": "eslint . --max-warnings 0",
+    "format:check": "prettier --check .",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc --pretty false",
     "desktop": "electron .",
@@ -20,14 +22,22 @@
     "package:win": "electron-builder --config electron-builder.yml --win --x64 --publish never",
     "package:mac": "electron-builder --config electron-builder.yml --mac --x64 --arm64 --publish never",
     "package:linux": "electron-builder --config electron-builder.yml --linux --x64 --publish never",
-    "deploy:itch:web": "bash scripts/publish-itch-web.sh"
+    "deploy:itch:web": "bash scripts/publish-itch-web.sh",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "concurrently": "^10.0.3",
     "cross-env": "^10.1.0",
     "electron": "^43.1.0",
     "electron-builder": "^26.15.3",
+    "eslint": "^10.8.1",
+    "globals": "^17.11.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.67.0",
     "vite": "^6.0.0",
     "wait-on": "^9.0.10"
   }
