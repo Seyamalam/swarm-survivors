@@ -1,0 +1,34 @@
+{
+  "name": "swarm-survivors",
+  "description": "A Vampire Survivors-style arena roguelike built with TypeScript + WebGL2.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173 --strictPort",
+    "build": "tsc && vite build",
+    "build:web": "npm run build",
+    "preview": "vite preview --host 0.0.0.0",
+    "typecheck": "tsc --pretty false",
+    "desktop": "electron .",
+    "desktop:dev": "concurrently --kill-others --success first \"npm:dev\" \"npm:desktop:dev:app\"",
+    "desktop:dev:app": "wait-on http://127.0.0.1:5173 && cross-env ELECTRON_DEV_URL=http://127.0.0.1:5173 electron .",
+    "package:win": "electron-builder --config electron-builder.yml --win --x64 --publish never",
+    "package:mac": "electron-builder --config electron-builder.yml --mac --x64 --arm64 --publish never",
+    "package:linux": "electron-builder --config electron-builder.yml --linux --x64 --publish never",
+    "deploy:itch:web": "bash scripts/publish-itch-web.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0",
+    "wait-on": "^9.0.10"
+  }
+}
