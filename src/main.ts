@@ -32,14 +32,18 @@ function showMenu() {
 }
 
 function startGame() {
-  world = new World(enemyDefs as EnemyDef[], weaponDefs[0] as WeaponDef, TEST_LEVEL);
+  world = new World(
+    enemyDefs as EnemyDef[],
+    weaponDefs[0] as WeaponDef,
+    TEST_LEVEL
+  );
   state = "playing";
   menu.hide();
 }
 
 showMenu();
 
-const GRID_SPACING = 128;
+const GRID_SPACING = 160;
 
 startLoop(
   (dt) => {
@@ -62,16 +66,34 @@ startLoop(
     if (world) {
       drawArena(world.config.arenaHalfSize);
 
-      renderer.push({ x: world.playerX, y: world.playerY, w: 22, h: 22, r: 0.4, g: 0.85, b: 1, a: 1 });
+      renderer.push({
+        x: world.playerX,
+        y: world.playerY,
+        w: 34,
+        h: 34,
+        r: 0.4,
+        g: 0.85,
+        b: 1,
+        a: 1,
+      });
 
-      const barW = 34;
+      const barW = 48;
       const hpFrac = Math.max(0, world.hp / world.config.playerMaxHp);
-      renderer.push({ x: world.playerX, y: world.playerY - 26, w: barW, h: 5, r: 0.2, g: 0.2, b: 0.25, a: 0.9 });
+      renderer.push({
+        x: world.playerX,
+        y: world.playerY - 38,
+        w: barW,
+        h: 7,
+        r: 0.2,
+        g: 0.2,
+        b: 0.25,
+        a: 0.9,
+      });
       renderer.push({
         x: world.playerX - (barW * (1 - hpFrac)) / 2,
-        y: world.playerY - 26,
+        y: world.playerY - 38,
         w: barW * hpFrac,
-        h: 5,
+        h: 7,
         r: 0.3,
         g: 0.9,
         b: 0.4,
@@ -80,18 +102,36 @@ startLoop(
 
       for (const e of world.enemies) {
         const [r, g, b] = e.def.color;
-        renderer.push({ x: e.x, y: e.y, w: e.def.size, h: e.def.size, r, g, b, a: 1 });
+        renderer.push({
+          x: e.x,
+          y: e.y,
+          w: e.def.size,
+          h: e.def.size,
+          r,
+          g,
+          b,
+          a: 1,
+        });
       }
 
       for (const p of world.projectiles) {
-        renderer.push({ x: p.x, y: p.y, w: 8, h: 8, r: 1, g: 0.95, b: 0.5, a: 1 });
+        renderer.push({
+          x: p.x,
+          y: p.y,
+          w: 14,
+          h: 14,
+          r: 1,
+          g: 0.95,
+          b: 0.5,
+          a: 1,
+        });
       }
 
       hud.textContent = `hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
     }
 
     renderer.flush();
-  },
+  }
 );
 
 function drawGrid(camX: number, camY: number) {
@@ -101,10 +141,28 @@ function drawGrid(camX: number, camY: number) {
   const y0 = Math.floor((camY - halfH) / GRID_SPACING) * GRID_SPACING;
 
   for (let x = x0; x <= camX + halfW; x += GRID_SPACING) {
-    renderer.push({ x, y: camY, w: 2, h: halfH * 2 + GRID_SPACING, r: 0.1, g: 0.12, b: 0.16, a: 1 });
+    renderer.push({
+      x,
+      y: camY,
+      w: 2,
+      h: halfH * 2 + GRID_SPACING,
+      r: 0.1,
+      g: 0.12,
+      b: 0.16,
+      a: 1,
+    });
   }
   for (let y = y0; y <= camY + halfH; y += GRID_SPACING) {
-    renderer.push({ x: camX, y, w: halfW * 2 + GRID_SPACING, h: 2, r: 0.1, g: 0.12, b: 0.16, a: 1 });
+    renderer.push({
+      x: camX,
+      y,
+      w: halfW * 2 + GRID_SPACING,
+      h: 2,
+      r: 0.1,
+      g: 0.12,
+      b: 0.16,
+      a: 1,
+    });
   }
 }
 

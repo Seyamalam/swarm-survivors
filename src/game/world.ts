@@ -30,12 +30,12 @@ export interface LevelConfig {
 export const TEST_LEVEL: LevelConfig = {
   arenaHalfSize: 2000,
   playerMaxHp: 100,
-  playerSpeed: 240,
+  playerSpeed: 360,
   contactDps: 12,
-  spawnIntervalStart: 1.1,
-  spawnIntervalMin: 0.12,
-  spawnDecay: 0.985,
-  weaponRange: 650,
+  spawnIntervalStart: 0.7,
+  spawnIntervalMin: 0.07,
+  spawnDecay: 0.97,
+  weaponRange: 800,
 };
 
 export class World {
@@ -54,7 +54,7 @@ export class World {
   constructor(
     private enemyDefs: EnemyDef[],
     private weapon: WeaponDef,
-    readonly config: LevelConfig,
+    readonly config: LevelConfig
   ) {
     this.hp = config.playerMaxHp;
     this.spawnInterval = config.spawnIntervalStart;
@@ -70,13 +70,24 @@ export class World {
 
     const len = Math.hypot(moveX, moveY) || 1;
     const bound = this.config.arenaHalfSize;
-    this.playerX = clamp(this.playerX + (moveX / len) * this.config.playerSpeed * dt, -bound, bound);
-    this.playerY = clamp(this.playerY + (moveY / len) * this.config.playerSpeed * dt, -bound, bound);
+    this.playerX = clamp(
+      this.playerX + (moveX / len) * this.config.playerSpeed * dt,
+      -bound,
+      bound
+    );
+    this.playerY = clamp(
+      this.playerY + (moveY / len) * this.config.playerSpeed * dt,
+      -bound,
+      bound
+    );
 
     this.spawnTimer -= dt;
     if (this.spawnTimer <= 0) {
       this.spawnTimer = this.spawnInterval;
-      this.spawnInterval = Math.max(this.config.spawnIntervalMin, this.spawnInterval * this.config.spawnDecay);
+      this.spawnInterval = Math.max(
+        this.config.spawnIntervalMin,
+        this.spawnInterval * this.config.spawnDecay
+      );
       this.spawnEnemy();
     }
 
@@ -87,7 +98,7 @@ export class World {
       e.x += (dx / d) * e.def.speed * dt;
       e.y += (dy / d) * e.def.speed * dt;
 
-      const touch = (e.def.size + 22) / 2;
+      const touch = (e.def.size + 34) / 2;
       if (d < touch) this.hp -= this.config.contactDps * dt;
     }
 
@@ -148,7 +159,8 @@ export class World {
   }
 
   private spawnEnemy() {
-    const def = this.enemyDefs[Math.floor(Math.random() * this.enemyDefs.length)];
+    const def =
+      this.enemyDefs[Math.floor(Math.random() * this.enemyDefs.length)];
     const angle = Math.random() * Math.PI * 2;
     const radius = 750 + Math.random() * 200;
     this.enemies.push({
