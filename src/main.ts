@@ -45,9 +45,32 @@ showMenu();
 
 const GRID_SPACING = 160;
 
-let fpsFrames = 0;
-let fpsLast = performance.now();
+let statFrames = 0;
+let statLast = performance.now();
 let fps = 0;
+let avgUpdateMs = 0;
+let avgRenderMs = 0;
+let busyPct = 0;
+let accUpdate = 0;
+let accRender = 0;
+
+interface DesktopMetrics {
+  cpuPercent: number;
+  processMemMb: number;
+  gpuProcMemMb: number;
+  systemTotalMb: number;
+  systemFreeMb: number;
+}
+let desktopMetrics: DesktopMetrics | null = null;
+if (desktop?.isDesktop) {
+  const poll = () =>
+    desktop.window
+      .getMetrics()
+      .then((m) => (desktopMetrics = m))
+      .catch(() => {});
+  void poll();
+  setInterval(poll, 1000);
+}
 
 startLoop(
   (dt) => {
@@ -60,12 +83,20 @@ startLoop(
     }
   },
   () => {
-    fpsFrames++;
+    statFrames++;
     const now = performance.now();
-    if (now - fpsLast >= 500) {
-      fps = Math.round((fpsFrames * 1000) / (now - fpsLast));
-      fpsFrames = 0;
-      fpsLast = now;
+    if (now - statLast >= 500) {
+      fps = Math.round((statFrames * 1000) / (now - statLast));
+      avgUpdateMs = accUpdate / statFrames;
+      avgRenderMs = accRender / statFrames;
+      busyPct = Math.min(
+        100,
+        ((accUpdate + accRender) / (now - statLast)) * 100
+      );
+      statFrames = 0;
+      accUpdate = 0;
+      accRender = 0;
+      statLast = now;
     }
     renderer.resize();
     const camX = world?.playerX ?? 0;
@@ -138,10 +169,24 @@ startLoop(
         });
       }
 
-      hud.textContent = `fps: ${fps} (sim 120Hz) | hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
+      const heapMb = performance.memory
+        ? Math.round(performance.memory.usedJSHeapSize / 1048576)
+        : "?";
+      const vramKb = Math.round(renderer.vramBytes / 1024);
+      const line1 = `hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
+      const line2 =
+        `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB` +
+        (desktopMetrics
+          ? ` · cpu ${desktopMetrics.cpuPercent}% · proc-ram ${desktopMetrics.processMemMb}MB · gpu-proc ${desktopMetrics.gpuProcMemMb}MB`
+          : "");
+      hud.innerHTML = `${line1}<br>${line2}<br><span style="opacity:.6">${renderer.gpuName}</span>`;
     }
 
     renderer.flush();
+  },
+  (timing) => {
+    accUpdate += timing.updateMs;
+    accRender += timing.renderMs;
   }
 );
 

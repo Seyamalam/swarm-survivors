@@ -14,6 +14,7 @@ A Vampire Survivors-style horde survival game built with TypeScript + raw WebGL2
 - **Auto-fire combat** — nearest-target bolt weapon, contact damage, HP bar, death → game over → instant retry
 - **Content-as-data** — enemies and weapons are pure JSON in `src/data/`, no engine knowledge needed to add more
 - **Zero-dependency game code** — no engine, no framework; TypeScript straight to WebGL2 (~10KB gzipped)
+- **Live perf overlay** — fps, update/render ms, main-thread busy %, JS heap, GPU model, GPU buffer footprint. The Electron build additionally shows real CPU% and per-process RAM via `app.getAppMetrics()` (browsers don't expose true CPU/GPU/VRAM counters to web pages)
 
 ## Screenshots
 

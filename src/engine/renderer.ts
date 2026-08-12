@@ -83,7 +83,14 @@ export class Renderer {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    const dbg = gl.getExtension("WEBGL_debug_renderer_info");
+    this.gpuName = dbg
+      ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL))
+      : "unknown GPU";
   }
+
+  readonly gpuName: string;
 
   resize() {
     const dpr = Math.min(window.devicePixelRatio, 2);
@@ -123,12 +130,22 @@ export class Renderer {
     const gl = this.gl;
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceBuffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.data, 0, this.count * FLOATS_PER_INSTANCE);
+    gl.bufferSubData(
+      gl.ARRAY_BUFFER,
+      0,
+      this.data,
+      0,
+      this.count * FLOATS_PER_INSTANCE
+    );
     gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.count);
   }
 
   get spriteCount() {
     return this.count;
+  }
+
+  get vramBytes() {
+    return this.data.byteLength + 32;
   }
 
   private grow() {
@@ -137,7 +154,11 @@ export class Renderer {
     next.set(this.data);
     this.data = next;
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.instanceBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.data.byteLength, this.gl.DYNAMIC_DRAW);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      this.data.byteLength,
+      this.gl.DYNAMIC_DRAW
+    );
   }
 
   private compile(type: number, src: string): WebGLShader {
