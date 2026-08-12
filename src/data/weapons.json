@@ -1,0 +1,4 @@
+[
+  { "id": "bolt", "name": "Magic Bolt", "damage": 8, "cooldown": 0.6, "projectileSpeed": 500 },
+  { "id": "aura", "name": "Frost Aura", "damage": 3, "cooldown": 1.5, "projectileSpeed": 0 }
+]
