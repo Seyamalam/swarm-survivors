@@ -13,10 +13,12 @@ export interface SpriteInstance {
   flash?: number;
 }
 
-const ATLAS = 512;
+const ATLAS_W = 2048;
+const ATLAS_H = 1024;
+const TILE = 256;
 
 function rect(x: number, y: number, w: number, h: number): UVRect {
-  return [x / ATLAS, y / ATLAS, w / ATLAS, h / ATLAS];
+  return [x / ATLAS_W, y / ATLAS_H, w / ATLAS_W, h / ATLAS_H];
 }
 
 export const UV = {
@@ -28,12 +30,27 @@ export const UV = {
   digit: (d: number): UVRect => rect(d * 40, 96, 40, 64),
 };
 
+function spriteSlots(): { x: number; y: number }[] {
+  const slots: { x: number; y: number }[] = [];
+  for (let y = 0; y < ATLAS_H; y += TILE) {
+    for (let x = 0; x < ATLAS_W; x += TILE) {
+      if (x < 512 && y < 512) continue;
+      slots.push({ x, y });
+    }
+  }
+  return slots;
+}
+
 function buildAtlas(): HTMLCanvasElement {
   const c = document.createElement("canvas");
-  c.width = ATLAS;
-  c.height = ATLAS;
+  c.width = ATLAS_W;
+  c.height = ATLAS_H;
   const ctx = c.getContext("2d")!;
+  drawProceduralTiles(ctx);
+  return c;
+}
 
+function drawProceduralTiles(ctx: CanvasRenderingContext2D) {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, 64, 64);
 
@@ -77,8 +94,6 @@ function buildAtlas(): HTMLCanvasElement {
   for (let d = 0; d <= 9; d++) {
     ctx.fillText(String(d), d * 40 + 20, 96 + 32);
   }
-
-  return c;
 }
 
 const VERT = `#version 300 es
@@ -191,6 +206,8 @@ export class Renderer {
   private bloomA: PostTarget | null = null;
   private bloomB: PostTarget | null = null;
   private atlasTex: WebGLTexture | null = null;
+  private atlasCanvas: HTMLCanvasElement | null = null;
+  private spriteUVs = new Map<string, UVRect>();
   readonly bloomEnabled: boolean;
   readonly gpuName: string;
 
@@ -239,6 +256,7 @@ export class Renderer {
 
     const tex = gl.createTexture()!;
     this.atlasTex = tex;
+    this.atlasCanvas = buildAtlas();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texImage2D(
       gl.TEXTURE_2D,
@@ -246,7 +264,7 @@ export class Renderer {
       gl.RGBA,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      buildAtlas()
+      this.atlasCanvas
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -347,6 +365,54 @@ export class Renderer {
       this.bloomA = this.createTarget(bw, bh);
       this.bloomB = this.createTarget(bw, bh);
     }
+  }
+
+  spriteUV(name: string): UVRect | undefined {
+    return this.spriteUVs.get(name);
+  }
+
+  async loadSprites(
+    manifest: { name: string; url: string }[]
+  ): Promise<number> {
+    const canvas = this.atlasCanvas;
+    if (!canvas) return 0;
+    const ctx = canvas.getContext("2d")!;
+    const slots = spriteSlots();
+    let loaded = 0;
+
+    await Promise.all(
+      manifest.map(
+        (entry, i) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              const slot = slots[i];
+              if (!slot) return resolve();
+              ctx.clearRect(slot.x, slot.y, TILE, TILE);
+              ctx.drawImage(img, slot.x, slot.y, TILE, TILE);
+              this.spriteUVs.set(entry.name, rect(slot.x, slot.y, TILE, TILE));
+              loaded++;
+              resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = entry.url;
+          })
+      )
+    );
+
+    if (loaded > 0) {
+      const gl = this.gl;
+      gl.bindTexture(gl.TEXTURE_2D, this.atlasTex);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        canvas
+      );
+    }
+    return loaded;
   }
 
   resize() {
@@ -488,7 +554,7 @@ export class Renderer {
   }
 
   get vramBytes() {
-    let bytes = this.data.byteLength + 32 + ATLAS * ATLAS * 4;
+    let bytes = this.data.byteLength + 32 + ATLAS_W * ATLAS_H * 4;
     for (const t of [this.sceneTarget, this.bloomA, this.bloomB]) {
       if (t) bytes += t.width * t.height * 4;
     }

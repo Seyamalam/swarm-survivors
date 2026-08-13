@@ -26,6 +26,18 @@ const desktop = window.desktopRuntime;
 const allWeapons = weaponDefs as WeaponDef[];
 const audio = new AudioEngine();
 
+const enemySpriteName = (def: EnemyDef) =>
+  def.boss ? `boss-${def.id}` : def.id;
+const spriteNames = [
+  "player",
+  "gem",
+  "bolt",
+  ...(enemyDefs as EnemyDef[]).map(enemySpriteName),
+];
+void renderer.loadSprites(
+  spriteNames.map((name) => ({ name, url: `sprites/${name}.png` }))
+);
+
 type State = "menu" | "playing" | "paused" | "draft" | "gameover" | "victory";
 let state: State = "menu";
 let settingsReturn: "menu" | "paused" = "menu";
@@ -270,16 +282,17 @@ startLoop(
 
       const flash =
         world.invuln > 0 ? 0.45 + 0.35 * Math.sin(world.time * 40) : 1;
+      const playerUV = renderer.spriteUV("player");
       renderer.push({
         x: world.playerX,
         y: world.playerY,
-        w: 34,
-        h: 34,
-        r: 0.4,
-        g: 0.85,
-        b: 1,
+        w: 44,
+        h: 44,
+        r: playerUV ? 1 : 0.4,
+        g: playerUV ? 1 : 0.85,
+        b: playerUV ? 1 : 1,
         a: flash,
-        uv: UV.diamond,
+        uv: playerUV ?? UV.diamond,
       });
 
       const barW = 48;
@@ -305,22 +318,24 @@ startLoop(
         a: 1,
       });
 
+      const gemUV = renderer.spriteUV("gem");
       for (const g2 of world.gems) {
         renderer.push({
           x: g2.x,
           y: g2.y,
-          w: 14,
-          h: 14,
-          r: 0.24,
-          g: 0.86,
-          b: 0.52,
+          w: 18,
+          h: 18,
+          r: gemUV ? 1 : 0.24,
+          g: gemUV ? 1 : 0.86,
+          b: gemUV ? 1 : 0.52,
           a: 1,
-          uv: UV.diamond,
+          uv: gemUV ?? UV.diamond,
         });
       }
 
       for (const e of world.enemies) {
-        const [r, g, b] = e.def.color;
+        const sprite = renderer.spriteUV(enemySpriteName(e.def));
+        const [r, g, b] = sprite ? [1, 1, 1] : e.def.color;
         renderer.push({
           x: e.x,
           y: e.y,
@@ -330,7 +345,7 @@ startLoop(
           g,
           b,
           a: 1,
-          uv: UV.circle,
+          uv: sprite ?? UV.circle,
           flash: e.flash > 0 ? e.flash / 0.18 : 0,
         });
       }
@@ -353,17 +368,18 @@ startLoop(
         }
       }
 
+      const boltUV = renderer.spriteUV("bolt");
       for (const p of world.projectiles) {
         renderer.push({
           x: p.x,
           y: p.y,
           w: p.size,
           h: p.size,
-          r: 1,
-          g: 0.95,
-          b: 0.5,
+          r: boltUV ? 1 : 1,
+          g: boltUV ? 1 : 0.95,
+          b: boltUV ? 1 : 0.5,
           a: 1,
-          uv: UV.spark,
+          uv: boltUV ?? UV.spark,
         });
       }
 
