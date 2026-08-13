@@ -293,6 +293,7 @@ startLoop(
         b: playerUV ? 1 : 1,
         a: flash,
         uv: playerUV ?? UV.diamond,
+        rot: world.playerAngle - Math.PI / 2,
       });
 
       const barW = 48;
@@ -347,6 +348,7 @@ startLoop(
           a: 1,
           uv: sprite ?? UV.circle,
           flash: e.flash > 0 ? e.flash / 0.18 : 0,
+          rot: e.angle - Math.PI / 2,
         });
       }
 
@@ -380,6 +382,7 @@ startLoop(
           b: boltUV ? 1 : 0.5,
           a: 1,
           uv: boltUV ?? UV.spark,
+          rot: Math.atan2(p.dy, p.dx) - Math.PI / 2,
         });
       }
 

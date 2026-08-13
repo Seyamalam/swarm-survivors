@@ -14,6 +14,7 @@ export interface Enemy {
   kx: number;
   ky: number;
   flash: number;
+  angle: number;
   lastOrbitHit: number;
   def: EnemyDef;
 }
@@ -122,6 +123,10 @@ export class World {
     return this.godMode || this.hp > 0;
   }
 
+  get playerAngle(): number {
+    return Math.atan2(this.lastMoveY, this.lastMoveX);
+  }
+
   addWeapon(def: WeaponDef) {
     this.weapons.push(createWeapon(def));
   }
@@ -147,6 +152,7 @@ export class World {
       e.kx = 0;
       e.ky = 0;
       e.flash = 0;
+      e.angle = 0;
       e.lastOrbitHit = -1;
       e.def = def;
       this.enemies.push(e);
@@ -233,6 +239,7 @@ export class World {
     e.kx = 0;
     e.ky = 0;
     e.flash = 0;
+    e.angle = 0;
     e.lastOrbitHit = -1;
     e.def = def;
     this.enemies.push(e);
@@ -244,6 +251,7 @@ export class World {
       const dx = this.playerX - e.x;
       const dy = this.playerY - e.y;
       const d = Math.hypot(dx, dy) || 1;
+      e.angle = Math.atan2(dy, dx);
       e.x += (dx / d) * e.def.speed * dt + e.kx * dt;
       e.y += (dy / d) * e.def.speed * dt + e.ky * dt;
       e.kx *= 1 - Math.min(1, 8 * dt);

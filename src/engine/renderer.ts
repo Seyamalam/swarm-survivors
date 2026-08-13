@@ -11,6 +11,7 @@ export interface SpriteInstance {
   a: number;
   uv?: UVRect;
   flash?: number;
+  rot?: number;
 }
 
 const ATLAS_W = 2048;
@@ -104,13 +105,18 @@ layout(location = 2) in vec2 aSize;
 layout(location = 3) in vec4 aColor;
 layout(location = 4) in vec4 aUV;
 layout(location = 5) in float aFlash;
+layout(location = 6) in float aRot;
 uniform vec2 uResolution;
 uniform vec2 uCamera;
 out vec2 vUV;
 out vec4 vColor;
 out float vFlash;
 void main() {
-  vec2 world = aPos + aCorner * aSize;
+  float cs = cos(aRot);
+  float sn = sin(aRot);
+  vec2 corner = aCorner * aSize;
+  vec2 rotated = vec2(corner.x * cs - corner.y * sn, corner.x * sn + corner.y * cs);
+  vec2 world = aPos + rotated;
   vec2 screen = (world - uCamera) / uResolution * 2.0;
   gl_Position = vec4(screen.x, -screen.y, 0.0, 1.0);
   vUV = aUV.xy + (aCorner + 0.5) * aUV.zw;
@@ -177,7 +183,7 @@ void main() {
   outColor = texture(uScene, vUV) + texture(uBloom, vUV) * 0.35;
 }`;
 
-const FLOATS_PER_INSTANCE = 13;
+const FLOATS_PER_INSTANCE = 14;
 const INITIAL_CAPACITY = 4096;
 
 interface PostTarget {
@@ -250,6 +256,7 @@ export class Renderer {
     attr(3, 4, 4);
     attr(4, 4, 8);
     attr(5, 1, 12);
+    attr(6, 1, 13);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -390,7 +397,10 @@ export class Renderer {
               if (!slot) return resolve();
               ctx.clearRect(slot.x, slot.y, TILE, TILE);
               ctx.drawImage(img, slot.x, slot.y, TILE, TILE);
-              this.spriteUVs.set(entry.name, rect(slot.x, slot.y, TILE, TILE));
+              this.spriteUVs.set(
+                entry.name,
+                rect(slot.x + 2, slot.y + 2, TILE - 4, TILE - 4)
+              );
               loaded++;
               resolve();
             };
@@ -462,6 +472,7 @@ export class Renderer {
     d[o + 10] = uv[2];
     d[o + 11] = uv[3];
     d[o + 12] = s.flash ?? 0;
+    d[o + 13] = s.rot ?? 0;
     this.count++;
   }
 
