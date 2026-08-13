@@ -1,5 +1,9 @@
 import type { EnemyDef, WeaponDef, Wave } from "./types";
 import { createWeapon, weaponStats, type WeaponInstance } from "./weapons";
+import { SpatialHash } from "../engine/spatial-hash";
+import { Particles } from "./vfx/particles";
+import { DamageNumbers } from "./vfx/damage-numbers";
+import { UV } from "../engine/renderer";
 
 export interface Enemy {
   id: number;
@@ -9,6 +13,7 @@ export interface Enemy {
   maxHp: number;
   kx: number;
   ky: number;
+  flash: number;
   lastOrbitHit: number;
   def: EnemyDef;
 }
@@ -54,6 +59,7 @@ export const PLAYER_SIZE = 34;
 const ORBIT_HIT_COOLDOWN = 0.4;
 const PROJECTILE_LIFE = 1.6;
 const KNOCKBACK_FORCE = 320;
+const MAX_ENEMY_SIZE = 140;
 
 export class World {
   playerX = 0;
@@ -75,6 +81,12 @@ export class World {
   projectiles: Projectile[] = [];
   gems: Gem[] = [];
 
+  readonly particles = new Particles();
+  readonly dmgNumbers = new DamageNumbers();
+  shake = 0;
+  hitStop = 0;
+  godMode = false;
+
   kills = 0;
   time = 0;
   victory = false;
@@ -85,12 +97,18 @@ export class World {
   private nextEnemyId = 1;
   private lastMoveX = 1;
   private lastMoveY = 0;
+  private hash = new SpatialHash<Enemy>(96);
+  private scratch: Enemy[] = [];
+  private enemyPool: Enemy[] = [];
+  private projectilePool: Projectile[] = [];
+  private gemPool: Gem[] = [];
 
   constructor(
     private enemyDefs: EnemyDef[],
     allWeapons: WeaponDef[],
     private waves: Wave[],
-    readonly config: LevelConfig
+    readonly config: LevelConfig,
+    readonly useSpatialHash = true
   ) {
     this.hp = config.playerMaxHp;
     this.maxHp = config.playerMaxHp;
@@ -99,7 +117,7 @@ export class World {
   }
 
   get alive() {
-    return this.hp > 0;
+    return this.godMode || this.hp > 0;
   }
 
   addWeapon(def: WeaponDef) {
@@ -111,10 +129,34 @@ export class World {
     if (w && w.level < w.def.levels.length) w.level++;
   }
 
+  stress(count: number) {
+    this.godMode = true;
+    for (let i = 0; i < count; i++) {
+      const def =
+        this.enemyDefs[Math.floor(Math.random() * (this.enemyDefs.length - 1))];
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 300 + Math.random() * 1100;
+      const e = this.enemyPool.pop() ?? ({} as Enemy);
+      e.id = this.nextEnemyId++;
+      e.x = this.playerX + Math.cos(angle) * radius;
+      e.y = this.playerY + Math.sin(angle) * radius;
+      e.hp = def.hp;
+      e.maxHp = def.hp;
+      e.kx = 0;
+      e.ky = 0;
+      e.flash = 0;
+      e.lastOrbitHit = -1;
+      e.def = def;
+      this.enemies.push(e);
+    }
+  }
+
   update(dt: number, moveX: number, moveY: number) {
     if (!this.alive || this.victory) return;
     this.time += dt;
     if (this.invuln > 0) this.invuln -= dt;
+    if (this.shake > 0) this.shake = Math.max(0, this.shake - dt * 2);
+    if (this.godMode && this.hp < 1) this.hp = 1;
 
     if (moveX !== 0 || moveY !== 0) {
       this.lastMoveX = moveX;
@@ -136,9 +178,13 @@ export class World {
 
     this.updateSpawns(dt);
     this.updateEnemies(dt);
+    if (this.useSpatialHash) this.hash.rebuild(this.enemies);
+    this.separateEnemies();
     this.updateWeapons(dt);
     this.updateProjectiles(dt);
     this.updateGems(dt);
+    this.particles.update(dt);
+    this.dmgNumbers.update(dt);
     this.reapDead();
   }
 
@@ -152,14 +198,13 @@ export class World {
   }
 
   private updateSpawns(dt: number) {
+    if (this.godMode) return;
     const wave = this.currentWave();
 
     if (wave.boss && !this.bossSpawned) {
       this.bossSpawned = true;
       const def = this.enemyDefs.find((d) => d.id === wave.boss);
-      if (def) {
-        this.boss = this.spawn(def);
-      }
+      if (def) this.boss = this.spawn(def);
     }
 
     this.spawnTimer -= dt;
@@ -174,24 +219,23 @@ export class World {
   private spawn(def: EnemyDef): Enemy {
     const angle = Math.random() * Math.PI * 2;
     const radius = 750 + Math.random() * 250;
-    const e: Enemy = {
-      id: this.nextEnemyId++,
-      x: this.playerX + Math.cos(angle) * radius,
-      y: this.playerY + Math.sin(angle) * radius,
-      hp: def.hp,
-      maxHp: def.hp,
-      kx: 0,
-      ky: 0,
-      lastOrbitHit: -1,
-      def,
-    };
+    const e = this.enemyPool.pop() ?? ({} as Enemy);
+    e.id = this.nextEnemyId++;
+    e.x = this.playerX + Math.cos(angle) * radius;
+    e.y = this.playerY + Math.sin(angle) * radius;
+    e.hp = def.hp;
+    e.maxHp = def.hp;
+    e.kx = 0;
+    e.ky = 0;
+    e.flash = 0;
+    e.lastOrbitHit = -1;
+    e.def = def;
     this.enemies.push(e);
     return e;
   }
 
   private updateEnemies(dt: number) {
-    const es = this.enemies;
-    for (const e of es) {
+    for (const e of this.enemies) {
       const dx = this.playerX - e.x;
       const dy = this.playerY - e.y;
       const d = Math.hypot(dx, dy) || 1;
@@ -199,36 +243,83 @@ export class World {
       e.y += (dy / d) * e.def.speed * dt + e.ky * dt;
       e.kx *= 1 - Math.min(1, 8 * dt);
       e.ky *= 1 - Math.min(1, 8 * dt);
-
-      const touch = (e.def.size + PLAYER_SIZE) / 2;
-      if (d < touch && this.invuln <= 0) {
-        this.hp -= e.def.damage;
-        this.invuln = this.config.invulnTime;
-        e.kx = (-dx / d) * KNOCKBACK_FORCE;
-        e.ky = (-dy / d) * KNOCKBACK_FORCE;
-      }
+      if (e.flash > 0) e.flash = Math.max(0, e.flash - dt * 5);
     }
 
-    for (let i = 0; i < es.length; i++) {
-      for (let j = i + 1; j < es.length; j++) {
-        const a = es[i];
-        const b = es[j];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const minDist = (a.def.size + b.def.size) / 2;
-        const d2 = dx * dx + dy * dy;
-        if (d2 > 0.01 && d2 < minDist * minDist) {
-          const d = Math.sqrt(d2);
-          const push = ((minDist - d) / d) * 0.5;
-          const px = dx * push;
-          const py = dy * push;
-          a.x -= px;
-          a.y -= py;
-          b.x += px;
-          b.y += py;
+    if (this.invuln <= 0) {
+      const touching = this.useSpatialHash
+        ? this.hash.queryCircle(
+            this.playerX,
+            this.playerY,
+            (PLAYER_SIZE + MAX_ENEMY_SIZE) / 2,
+            this.scratch
+          )
+        : this.enemies;
+      for (const e of touching) {
+        const d = Math.hypot(e.x - this.playerX, e.y - this.playerY);
+        const touch = (e.def.size + PLAYER_SIZE) / 2;
+        if (d < touch) {
+          this.hp -= e.def.damage;
+          this.invuln = this.config.invulnTime;
+          this.shake = Math.min(1, this.shake + 0.3);
+          const dir = d || 1;
+          e.kx = ((e.x - this.playerX) / dir) * KNOCKBACK_FORCE;
+          e.ky = ((e.y - this.playerY) / dir) * KNOCKBACK_FORCE;
+          break;
         }
       }
     }
+  }
+
+  private separateEnemies() {
+    const es = this.enemies;
+    if (this.useSpatialHash) {
+      for (const a of es) {
+        const radius = (a.def.size + MAX_ENEMY_SIZE) / 2;
+        const neighbors = this.hash.queryCircle(a.x, a.y, radius, this.scratch);
+        for (const b of neighbors) {
+          if (b.id <= a.id) continue;
+          this.pushApart(a, b);
+        }
+      }
+    } else {
+      for (let i = 0; i < es.length; i++) {
+        for (let j = i + 1; j < es.length; j++) {
+          this.pushApart(es[i], es[j]);
+        }
+      }
+    }
+  }
+
+  private pushApart(a: Enemy, b: Enemy) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const minDist = (a.def.size + b.def.size) / 2;
+    const d2 = dx * dx + dy * dy;
+    if (d2 > 0.01 && d2 < minDist * minDist) {
+      const d = Math.sqrt(d2);
+      const push = ((minDist - d) / d) * 0.5;
+      const px = dx * push;
+      const py = dy * push;
+      a.x -= px;
+      a.y -= py;
+      b.x += px;
+      b.y += py;
+    }
+  }
+
+  damageEnemy(e: Enemy, amount: number) {
+    e.hp -= amount;
+    e.flash = 0.18;
+    this.dmgNumbers.spawn(e.x, e.y - e.def.size / 2, amount);
+    this.particles.emit(e.x, e.y, {
+      count: 3,
+      speed: 220,
+      life: 0.3,
+      size: 7,
+      color: [1, 0.9, 0.5],
+      uv: UV.spark,
+    });
   }
 
   private updateWeapons(dt: number) {
@@ -255,12 +346,20 @@ export class World {
           w.timer -= dt;
           if (w.timer <= 0) {
             w.timer = s.cooldown;
-            for (const e of this.enemies) {
+            const targets = this.useSpatialHash
+              ? this.hash.queryCircle(
+                  this.playerX,
+                  this.playerY,
+                  s.radius + MAX_ENEMY_SIZE / 2,
+                  this.scratch
+                )
+              : this.enemies;
+            for (const e of targets) {
               if (
                 Math.hypot(e.x - this.playerX, e.y - this.playerY) <
                 s.radius + e.def.size / 2
               ) {
-                e.hp -= s.damage * this.damageMult;
+                this.damageEnemy(e, s.damage * this.damageMult);
               }
             }
           }
@@ -272,14 +371,22 @@ export class World {
             const a = w.angle + (i * Math.PI * 2) / s.count;
             const ox = this.playerX + Math.cos(a) * s.radius;
             const oy = this.playerY + Math.sin(a) * s.radius;
-            for (const e of this.enemies) {
+            const targets = this.useSpatialHash
+              ? this.hash.queryCircle(
+                  ox,
+                  oy,
+                  (s.orbSize + MAX_ENEMY_SIZE) / 2,
+                  this.scratch
+                )
+              : this.enemies;
+            for (const e of targets) {
               if (this.time - e.lastOrbitHit < ORBIT_HIT_COOLDOWN) continue;
               if (
                 Math.hypot(e.x - ox, e.y - oy) <
                 (e.def.size + s.orbSize) / 2
               ) {
-                e.hp -= s.damage * this.damageMult;
                 e.lastOrbitHit = this.time;
+                this.damageEnemy(e, s.damage * this.damageMult);
                 const d =
                   Math.hypot(e.x - this.playerX, e.y - this.playerY) || 1;
                 e.kx += ((e.x - this.playerX) / d) * KNOCKBACK_FORCE * 0.5;
@@ -293,82 +400,99 @@ export class World {
     }
   }
 
+  private makeProjectile(
+    angle: number,
+    s: Record<string, number>,
+    out: Projectile
+  ): Projectile {
+    out.x = this.playerX;
+    out.y = this.playerY;
+    out.dx = Math.cos(angle);
+    out.dy = Math.sin(angle);
+    out.damage = s.damage * this.damageMult;
+    out.life = PROJECTILE_LIFE;
+    out.size = s.size;
+    out.speed = s.speed;
+    out.pierce = s.pierce;
+    if (!out.hitIds) out.hitIds = [];
+    out.hitIds.length = 0;
+    return out;
+  }
+
   private fireProjectiles(s: Record<string, number>) {
     const target = this.nearestEnemy();
-    let bx: number;
-    let by: number;
-    if (target) {
-      bx = target.x - this.playerX;
-      by = target.y - this.playerY;
-    } else {
-      bx = this.lastMoveX;
-      by = this.lastMoveY;
-    }
+    const bx = target ? target.x - this.playerX : this.lastMoveX;
+    const by = target ? target.y - this.playerY : this.lastMoveY;
     const baseAngle = Math.atan2(by, bx);
-    const count = s.count;
-    for (let i = 0; i < count; i++) {
-      const spread = (i - (count - 1) / 2) * 0.14;
-      const a = baseAngle + spread;
-      this.projectiles.push({
-        x: this.playerX,
-        y: this.playerY,
-        dx: Math.cos(a),
-        dy: Math.sin(a),
-        damage: s.damage * this.damageMult,
-        life: PROJECTILE_LIFE,
-        size: s.size,
-        speed: s.speed,
-        pierce: s.pierce,
-        hitIds: [],
-      });
+    for (let i = 0; i < s.count; i++) {
+      const spread = (i - (s.count - 1) / 2) * 0.14;
+      this.projectiles.push(
+        this.makeProjectile(
+          baseAngle + spread,
+          s,
+          this.projectilePool.pop() ?? ({} as Projectile)
+        )
+      );
     }
   }
 
   private fireNova(s: Record<string, number>) {
     for (let i = 0; i < s.count; i++) {
       const a = (i / s.count) * Math.PI * 2;
-      this.projectiles.push({
-        x: this.playerX,
-        y: this.playerY,
-        dx: Math.cos(a),
-        dy: Math.sin(a),
-        damage: s.damage * this.damageMult,
-        life: PROJECTILE_LIFE,
-        size: s.size,
-        speed: s.speed,
-        pierce: s.pierce,
-        hitIds: [],
-      });
+      this.projectiles.push(
+        this.makeProjectile(
+          a,
+          s,
+          this.projectilePool.pop() ?? ({} as Projectile)
+        )
+      );
     }
   }
 
   private updateProjectiles(dt: number) {
-    for (let i = this.projectiles.length - 1; i >= 0; i--) {
-      const p = this.projectiles[i];
+    const ps = this.projectiles;
+    for (let i = ps.length - 1; i >= 0; i--) {
+      const p = ps[i];
       p.x += p.dx * p.speed * dt;
       p.y += p.dy * p.speed * dt;
       p.life -= dt;
       if (p.life <= 0) {
-        this.projectiles.splice(i, 1);
+        ps[i] = ps[ps.length - 1];
+        ps.pop();
+        this.projectilePool.push(p);
         continue;
       }
-      for (const e of this.enemies) {
+      const targets = this.useSpatialHash
+        ? this.hash.queryCircle(
+            p.x,
+            p.y,
+            p.size / 2 + MAX_ENEMY_SIZE / 2,
+            this.scratch
+          )
+        : this.enemies;
+      let dead = false;
+      for (const e of targets) {
         if (p.hitIds.includes(e.id)) continue;
         if (Math.hypot(e.x - p.x, e.y - p.y) < (e.def.size + p.size) / 2) {
-          e.hp -= p.damage;
+          this.damageEnemy(e, p.damage);
           p.hitIds.push(e.id);
           if (p.hitIds.length > p.pierce) {
-            this.projectiles.splice(i, 1);
+            ps[i] = ps[ps.length - 1];
+            ps.pop();
+            this.projectilePool.push(p);
+            dead = true;
             break;
           }
         }
       }
+      if (dead) continue;
     }
   }
 
   private updateGems(dt: number) {
-    for (let i = this.gems.length - 1; i >= 0; i--) {
-      const g = this.gems[i];
+    const gs = this.gems;
+    for (let i = gs.length - 1; i >= 0; i--) {
+      const g = gs[i];
       const dx = this.playerX - g.x;
       const dy = this.playerY - g.y;
       const d = Math.hypot(dx, dy);
@@ -378,7 +502,9 @@ export class World {
         g.y += (dy / (d || 1)) * pull;
       }
       if (d < PLAYER_SIZE / 2 + 10) {
-        this.gems.splice(i, 1);
+        gs[i] = gs[gs.length - 1];
+        gs.pop();
+        this.gemPool.push(g);
         this.gainXp(g.xp);
       }
     }
@@ -391,19 +517,52 @@ export class World {
       this.level++;
       this.xpNext = 8 + (this.level - 1) * 6;
       this.pendingLevels++;
+      this.particles.emit(this.playerX, this.playerY, {
+        count: 24,
+        speed: 300,
+        life: 0.6,
+        size: 9,
+        color: [0.4, 0.85, 1],
+        uv: UV.spark,
+      });
     }
   }
 
   private reapDead() {
-    for (let i = this.enemies.length - 1; i >= 0; i--) {
-      const e = this.enemies[i];
+    const es = this.enemies;
+    for (let i = es.length - 1; i >= 0; i--) {
+      const e = es[i];
       if (e.hp <= 0) {
-        this.enemies.splice(i, 1);
+        es[i] = es[es.length - 1];
+        es.pop();
+        this.enemyPool.push(e);
         this.kills++;
-        this.gems.push({ x: e.x, y: e.y, xp: e.def.xp });
+
+        const g = this.gemPool.pop() ?? ({} as Gem);
+        g.x = e.x;
+        g.y = e.y;
+        g.xp = e.def.xp;
+        this.gems.push(g);
+
+        this.particles.emit(e.x, e.y, {
+          count: e.def.boss ? 80 : 10,
+          speed: e.def.boss ? 500 : 260,
+          life: 0.5,
+          size: e.def.boss ? 14 : 9,
+          color: e.def.color,
+          uv: UV.spark,
+        });
+
+        if (e.def.xp >= 5) {
+          this.hitStop = Math.max(this.hitStop, 0.06);
+          this.shake = Math.min(1, this.shake + 0.12);
+        }
+
         if (e.def.boss) {
           this.boss = null;
           this.victory = true;
+          this.shake = 1;
+          this.hitStop = 0.3;
         }
       }
     }

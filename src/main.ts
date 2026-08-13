@@ -1,4 +1,4 @@
-import { Renderer } from "./engine/renderer";
+import { Renderer, UV } from "./engine/renderer";
 import { Input } from "./engine/input";
 import { startLoop } from "./engine/loop";
 import { World, TEST_LEVEL } from "./game/world";
@@ -9,12 +9,16 @@ import enemyDefs from "./data/enemies.json";
 import weaponDefs from "./data/weapons.json";
 import waves from "./data/waves.json";
 
+const params = new URLSearchParams(window.location.search);
+const NAIVE_MODE = params.has("naive");
+const STRESS_COUNT = Number(params.get("stress") ?? 0);
+
 const canvas = document.querySelector<HTMLCanvasElement>("#game")!;
 const hud = document.querySelector<HTMLDivElement>("#hud")!;
 const xpbar = document.querySelector<HTMLDivElement>("#xpbar")!;
 const leveltag = document.querySelector<HTMLDivElement>("#leveltag")!;
 
-const renderer = new Renderer(canvas);
+const renderer = new Renderer(canvas, NAIVE_MODE);
 const input = new Input(window);
 const desktop = window.desktopRuntime;
 const allWeapons = weaponDefs as WeaponDef[];
@@ -43,8 +47,10 @@ function startGame() {
     enemyDefs as EnemyDef[],
     allWeapons,
     waves as Wave[],
-    TEST_LEVEL
+    TEST_LEVEL,
+    !NAIVE_MODE
   );
+  if (STRESS_COUNT > 0) world.stress(STRESS_COUNT);
   state = "playing";
   menu.hide();
 }
@@ -100,14 +106,18 @@ if (desktop?.isDesktop) {
 startLoop(
   (dt) => {
     if (state === "playing" && world) {
-      world.update(dt, input.moveX, input.moveY);
+      if (world.hitStop > 0) {
+        world.hitStop -= dt;
+      } else {
+        world.update(dt, input.moveX, input.moveY);
+      }
       if (world.victory) {
         state = "victory";
         menu.showVictory(world.kills, world.time);
       } else if (!world.alive) {
         state = "gameover";
         menu.showGameOver(world.kills, world.time);
-      } else if (world.pendingLevels > 0) {
+      } else if (world.pendingLevels > 0 && STRESS_COUNT === 0) {
         openDraft();
       }
     }
@@ -129,8 +139,13 @@ startLoop(
       statLast = now;
     }
     renderer.resize();
-    const camX = world?.playerX ?? 0;
-    const camY = world?.playerY ?? 0;
+    let camX = world?.playerX ?? 0;
+    let camY = world?.playerY ?? 0;
+    if (world && world.shake > 0) {
+      const mag = world.shake * world.shake * 22;
+      camX += (Math.random() - 0.5) * 2 * mag;
+      camY += (Math.random() - 0.5) * 2 * mag;
+    }
     renderer.begin(camX, camY);
 
     drawGrid(camX, camY);
@@ -150,6 +165,7 @@ startLoop(
             g: 0.8,
             b: 1,
             a: 0.08,
+            uv: UV.circle,
           });
         }
       }
@@ -165,6 +181,7 @@ startLoop(
         g: 0.85,
         b: 1,
         a: flash,
+        uv: UV.diamond,
       });
 
       const barW = 48;
@@ -194,12 +211,13 @@ startLoop(
         renderer.push({
           x: g2.x,
           y: g2.y,
-          w: 12,
-          h: 12,
+          w: 14,
+          h: 14,
           r: 0.24,
           g: 0.86,
           b: 0.52,
           a: 1,
+          uv: UV.diamond,
         });
       }
 
@@ -214,6 +232,8 @@ startLoop(
           g,
           b,
           a: 1,
+          uv: UV.circle,
+          flash: e.flash > 0 ? e.flash / 0.18 : 0,
         });
       }
 
@@ -229,6 +249,7 @@ startLoop(
               g: 0.9,
               b: 1,
               a: 0.95,
+              uv: UV.spark,
             });
           }
         }
@@ -244,7 +265,44 @@ startLoop(
           g: 0.95,
           b: 0.5,
           a: 1,
+          uv: UV.spark,
         });
+      }
+
+      for (const pt of world.particles.items) {
+        const lifeFrac = pt.life / pt.maxLife;
+        renderer.push({
+          x: pt.x,
+          y: pt.y,
+          w: pt.size * lifeFrac,
+          h: pt.size * lifeFrac,
+          r: pt.r,
+          g: pt.g,
+          b: pt.b,
+          a: lifeFrac,
+          uv: pt.uv,
+        });
+      }
+
+      for (const dn of world.dmgNumbers.items) {
+        const digits = String(dn.value);
+        const dw = 13;
+        const dh = 20;
+        const startX = dn.x - (digits.length * dw) / 2;
+        const alpha = Math.min(1, dn.life / (dn.maxLife * 0.5));
+        for (let i = 0; i < digits.length; i++) {
+          renderer.push({
+            x: startX + i * dw + dw / 2,
+            y: dn.y,
+            w: dw,
+            h: dh,
+            r: 1,
+            g: 0.95,
+            b: 0.6,
+            a: alpha,
+            uv: UV.digit(Number(digits[i])),
+          });
+        }
       }
 
       xpbar.style.width = `${Math.min(100, (world.xp / world.xpNext) * 100)}%`;
@@ -257,9 +315,10 @@ startLoop(
       const bossText = world.boss
         ? ` | BOSS: ${Math.ceil(world.boss.hp)}/${world.boss.maxHp}`
         : "";
-      const line1 = `hp: ${Math.ceil(world.hp)}/${world.maxHp} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s${bossText}`;
+      const modeText = NAIVE_MODE ? " | NAIVE MODE" : "";
+      const line1 = `hp: ${Math.ceil(world.hp)}/${world.maxHp} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s${bossText}${modeText}`;
       const line2 =
-        `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB` +
+        `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB · bloom ${renderer.bloomEnabled ? "on" : "off"}` +
         (desktopMetrics
           ? ` · cpu ${desktopMetrics.cpuPercent}% · proc-ram ${desktopMetrics.processMemMb}MB · gpu-proc ${desktopMetrics.gpuProcMemMb}MB`
           : "");
@@ -267,6 +326,7 @@ startLoop(
     }
 
     renderer.flush();
+    renderer.endFrame();
   },
   (timing) => {
     accUpdate += timing.updateMs;
@@ -314,3 +374,15 @@ function drawArena(half: number) {
   renderer.push({ x: -half, y: 0, w: t, h: half * 2 + t, ...c });
   renderer.push({ x: half, y: 0, w: t, h: half * 2 + t, ...c });
 }
+
+window.__perf = () => ({
+  fps,
+  updateMs: avgUpdateMs,
+  renderMs: avgRenderMs,
+  busyPct,
+  sprites: renderer.spriteCount,
+  enemies: world?.enemies.length ?? 0,
+  kills: world?.kills ?? 0,
+  bloom: renderer.bloomEnabled,
+  naive: NAIVE_MODE,
+});

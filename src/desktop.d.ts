@@ -29,3 +29,19 @@ interface Performance {
 interface Window {
   desktopRuntime?: DesktopRuntime;
 }
+
+interface PerfSnapshot {
+  fps: number;
+  updateMs: number;
+  renderMs: number;
+  busyPct: number;
+  sprites: number;
+  enemies: number;
+  kills: number;
+  bloom: boolean;
+  naive: boolean;
+}
+
+interface Window {
+  __perf?: () => PerfSnapshot;
+}

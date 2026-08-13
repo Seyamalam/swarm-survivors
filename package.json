@@ -25,7 +25,8 @@
     "deploy:itch:web": "bash scripts/publish-itch-web.sh",
     "prepare": "husky",
     "screenshots": "node scripts/capture-screenshots.mjs",
-    "test:smoke": "node scripts/smoke-test.mjs"
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "benchmark": "node scripts/benchmark.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
