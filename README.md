@@ -8,13 +8,22 @@ A Vampire Survivors-style horde survival game built with TypeScript + raw WebGL2
 
 ## Features
 
-- **Single-draw-call rendering** — all sprites (player, enemies, projectiles, grid, UI bars) batched into one `drawArraysInstanced` call via WebGL2
+- **Single-draw-call rendering** — all sprites batched into one `drawArraysInstanced` call via WebGL2
+- **Procedural texture atlas** — shapes + digit font generated at runtime; per-instance UVs and hit-flash in the shader
+- **Bloom post-processing** — bright-pass + separable gaussian blur + additive composite (FBO ping-pong)
+- **Spatial hash collision** — uniform grid neighbor queries replace O(n²) pairwise checks
+- **Object pooling** — enemies, projectiles, gems, particles, damage numbers all recycled (near-zero GC churn)
+- **Game feel** — particles, floating damage numbers, screen shake, hit-stop on elite kills
 - **Fixed 120Hz simulation** — accumulator-based timestep decoupled from render rate; identical gameplay on any display, with a live FPS counter in the HUD
-- **Escalating horde** — spawn interval decays from 0.7s to 0.07s; three enemy archetypes (crawler, runner, brute) with distinct speed/size/HP
-- **Auto-fire combat** — nearest-target bolt weapon, contact damage, HP bar, death → game over → instant retry
-- **Content-as-data** — enemies and weapons are pure JSON in `src/data/`, no engine knowledge needed to add more
-- **Zero-dependency game code** — no engine, no framework; TypeScript straight to WebGL2 (~10KB gzipped)
+- **Escalating horde** — 12-wave timeline over 10 minutes, 16 enemy types, Hive Tyrant boss at 10:00
+- **Roguelike draft** — level up → pick 1 of 3 cards: new weapon (4 mechanics: projectile/aura/orbit/nova), weapon upgrade, or stat boost
+- **Content-as-data** — enemies, weapons, waves are pure JSON in `src/data/`, no engine knowledge needed to add more
+- **Zero-dependency game code** — no engine, no framework; TypeScript straight to WebGL2 (~12KB gzipped)
 - **Live perf overlay** — fps, update/render ms, main-thread busy %, JS heap, GPU model, GPU buffer footprint. The Electron build additionally shows real CPU% and per-process RAM via `app.getAppMetrics()` (browsers don't expose true CPU/GPU/VRAM counters to web pages)
+
+## Benchmark
+
+`npm run benchmark` stress-tests naive (per-sprite draw calls, O(n²) collision) vs optimized (instancing, spatial hash, pooling) at 500–10,000 enemies and writes `docs/benchmark.md`. The `naive-renderer` branch preserves the pre-optimization code for the grading comparison.
 
 ## Screenshots
 
@@ -92,11 +101,14 @@ The codebase is split so each member owns a separable area:
 - [x] Game loop, input, camera-follow, basic enemy spawning/seeking
 - [x] Auto-firing weapons driven by `src/data/weapons.json`
 - [x] HUD + menus
-- [ ] Spatial hash grid for collision (naive O(n²) dies ~1k enemies — this is the CG talking point)
+- [x] Spatial hash grid for collision
 - [x] Multiple simultaneous weapons + upgrades
 - [x] XP gems, leveling, 3-card upgrade draft
-- [ ] Particle system + damage numbers
+- [x] Particle system + damage numbers
 - [x] One boss wave at 10 minutes
+- [x] Bloom post-processing + benchmark harness (`docs/benchmark.md`)
+- [ ] Sound effects + music
+- [ ] Title/pause polish, game-over stats screen
 
 **Explicitly out of scope:** meta-progression saves, multiple stages/characters, online anything.
 

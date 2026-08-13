@@ -24,15 +24,15 @@ Status: `todo` → `doing` → `done`. Owner key: **M1** engine core, **M2** con
 
 ## Milestone 3 — CG showcase (the grading material)
 
-- [ ] Spatial hash grid collision (replaces naive O(n²)) (M1)
-- [ ] Object pooling for enemies/projectiles/particles (M1)
-- [ ] Sprite atlas + textured quads (replace colored squares) (M1)
-- [ ] Particle system: hit sparks, death bursts, level-up flash (M3)
-- [ ] Damage numbers + hit flashes (M3)
-- [ ] Screen shake + hit-stop on big kills (M3)
-- [ ] Post-processing: bloom/glow pass (M1)
-- [ ] `naive-renderer` branch preserved for before/after benchmark (M1)
-- [ ] Frame-time benchmark: naive vs instanced+spatial-hash, graph for report (M1)
+- [x] Spatial hash grid collision (replaces naive O(n²)) (M1)
+- [x] Object pooling for enemies/projectiles/particles (M1)
+- [x] Sprite atlas + textured quads (procedural runtime atlas: shapes + digit font) (M1)
+- [x] Particle system: hit sparks, death bursts, level-up flash (M3)
+- [x] Damage numbers + hit flashes (M3)
+- [x] Screen shake + hit-stop on big kills (M3)
+- [x] Post-processing: bloom/glow pass (M1)
+- [x] `naive-renderer` branch preserved for before/after benchmark (M1)
+- [x] Frame-time benchmark: naive vs instanced+spatial-hash, graph for report (M1) — see `docs/benchmark.md`
 
 ## Milestone 4 — Polish & ship
 

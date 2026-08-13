@@ -80,6 +80,11 @@ try {
     "",
     `Measured with \`npm run benchmark\` (headless Chromium, 1280x720, ${SAMPLE_SECONDS}s samples, god-mode stress spawns).`,
     "",
+    "> Note: headless Chromium renders via SwiftShader (software GL), so absolute FPS is CPU-bound.",
+    "> On real GPUs the optimized path holds much higher framerates — the meaningful column is the",
+    "> naive-vs-optimized ratio, especially update ms (collision/separation) which is GPU-independent.",
+    "> Update ms at low FPS also includes fixed-timestep catch-up ticks (120Hz accumulator).",
+    "",
     "| Mode | Enemies | FPS | Update ms | Render ms |",
     "| --- | --- | --- | --- | --- |",
     ...results.map(

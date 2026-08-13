@@ -1,0 +1,74 @@
+[
+  {
+    "mode": "naive",
+    "enemies": 500,
+    "fps": 39,
+    "updateMs": 1.69,
+    "renderMs": 0.16,
+    "frameMs": 1.85,
+    "sprites": 523
+  },
+  {
+    "mode": "naive",
+    "enemies": 2000,
+    "fps": 3,
+    "updateMs": 261.72,
+    "renderMs": 0.58,
+    "frameMs": 262.3,
+    "sprites": 2030
+  },
+  {
+    "mode": "naive",
+    "enemies": 5000,
+    "fps": 1,
+    "updateMs": 1652.16,
+    "renderMs": 1.24,
+    "frameMs": 1653.4,
+    "sprites": 5029
+  },
+  {
+    "mode": "naive",
+    "enemies": 10000,
+    "fps": 0,
+    "updateMs": 5800.7,
+    "renderMs": 1.67,
+    "frameMs": 5802.37,
+    "sprites": 10029
+  },
+  {
+    "mode": "optimized",
+    "enemies": 500,
+    "fps": 70,
+    "updateMs": 0.52,
+    "renderMs": 0.07,
+    "frameMs": 0.59,
+    "sprites": 529
+  },
+  {
+    "mode": "optimized",
+    "enemies": 2000,
+    "fps": 22,
+    "updateMs": 9.15,
+    "renderMs": 0.18,
+    "frameMs": 9.32,
+    "sprites": 2031
+  },
+  {
+    "mode": "optimized",
+    "enemies": 5000,
+    "fps": 5,
+    "updateMs": 148.67,
+    "renderMs": 0.32,
+    "frameMs": 148.99,
+    "sprites": 5029
+  },
+  {
+    "mode": "optimized",
+    "enemies": 10000,
+    "fps": 2,
+    "updateMs": 421.98,
+    "renderMs": 0.51,
+    "frameMs": 422.49,
+    "sprites": 10031
+  }
+]

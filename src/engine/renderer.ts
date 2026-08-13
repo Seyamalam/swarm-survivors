@@ -183,6 +183,7 @@ export class Renderer {
   private uResolution: WebGLUniformLocation;
   private uCamera: WebGLUniformLocation;
   private postVao: WebGLVertexArrayObject | null = null;
+  private postBuffer: WebGLBuffer | null = null;
   private brightProgram: WebGLProgram | null = null;
   private blurProgram: WebGLProgram | null = null;
   private compositeProgram: WebGLProgram | null = null;
@@ -271,6 +272,7 @@ export class Renderer {
       this.postVao = gl.createVertexArray()!;
       gl.bindVertexArray(this.postVao);
       const quad = gl.createBuffer()!;
+      this.postBuffer = quad;
       gl.bindBuffer(gl.ARRAY_BUFFER, quad);
       gl.bufferData(
         gl.ARRAY_BUFFER,
@@ -432,7 +434,11 @@ export class Renderer {
     const a = this.bloomA!;
     const b = this.bloomB!;
 
+    gl.disable(gl.BLEND);
+
     gl.bindVertexArray(this.postVao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.postBuffer);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     gl.activeTexture(gl.TEXTURE0);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, a.fbo);
@@ -474,6 +480,7 @@ export class Renderer {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindVertexArray(null);
+    gl.enable(gl.BLEND);
   }
 
   get spriteCount() {
