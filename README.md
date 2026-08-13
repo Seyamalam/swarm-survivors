@@ -107,8 +107,10 @@ The codebase is split so each member owns a separable area:
 - [x] Particle system + damage numbers
 - [x] One boss wave at 10 minutes
 - [x] Bloom post-processing + benchmark harness (`docs/benchmark.md`)
-- [ ] Sound effects + music
-- [ ] Title/pause polish, game-over stats screen
+- [x] Sound effects + generative music (procedural WebAudio, zero assets)
+- [x] Pause menu (ESC) with live run stats; settings (volume, fullscreen, window size)
+- [x] Game-over/victory stats screens: kills, DPS, level, build summary
+- [x] Desktop builds for win/mac/linux published to itch.io
 
 **Explicitly out of scope:** meta-progression saves, multiple stages/characters, online anything.
 

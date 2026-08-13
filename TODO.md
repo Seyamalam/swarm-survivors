@@ -36,14 +36,13 @@ Status: `todo` → `doing` → `done`. Owner key: **M1** engine core, **M2** con
 
 ## Milestone 4 — Polish & ship
 
-- [ ] Title screen art + logo pass (M4)
-- [ ] Pause menu (ESC) with stats (M4)
-- [ ] Settings: fullscreen/window size (desktop IPC already exposed), volume (M4)
-- [ ] Sound effects + music (M3)
-- [ ] Game-over stats screen: kills, DPS, time, build summary (M4)
-- [ ] itch.io page: screenshots, description, tags (M4)
-- [ ] Desktop builds: win/mac/linux via `npm run package:*`, upload to itch (M1)
-- [ ] Demo video for grading (everyone records their part)
+- [x] Title screen art + logo pass (M4)
+- [x] Pause menu (ESC) with stats (M4)
+- [x] Settings: fullscreen/window size (desktop IPC already exposed), volume (M4)
+- [x] Sound effects + music (procedural WebAudio, no assets) (M3)
+- [x] Game-over stats screen: kills, DPS, time, build summary (M4)
+- [x] itch.io page: copy-paste content in `docs/itch-page.md` (M4)
+- [x] Desktop builds: win/mac/linux via `npm run package:*`, upload to itch (M1) — all 5 channels live (html5, windows-x64, osx-arm64, osx-x64, linux-x64)
 
 ## Explicitly out of scope
 

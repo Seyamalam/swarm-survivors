@@ -4,7 +4,8 @@ import { startLoop } from "./engine/loop";
 import { World, TEST_LEVEL } from "./game/world";
 import { generateDraft, applyDraft } from "./game/upgrades";
 import type { EnemyDef, WeaponDef, Wave } from "./game/types";
-import { Menu } from "./ui/menu";
+import { Menu, type RunStats } from "./ui/menu";
+import { AudioEngine } from "./audio/audio";
 import enemyDefs from "./data/enemies.json";
 import weaponDefs from "./data/weapons.json";
 import waves from "./data/waves.json";
@@ -22,20 +23,59 @@ const renderer = new Renderer(canvas, NAIVE_MODE);
 const input = new Input(window);
 const desktop = window.desktopRuntime;
 const allWeapons = weaponDefs as WeaponDef[];
+const audio = new AudioEngine();
 
-type State = "menu" | "playing" | "draft" | "gameover" | "victory";
+type State = "menu" | "playing" | "paused" | "draft" | "gameover" | "victory";
 let state: State = "menu";
+let settingsReturn: "menu" | "paused" = "menu";
 let world: World | null = null;
+
+function runStats(w: World): RunStats {
+  return {
+    kills: w.kills,
+    time: w.time,
+    level: w.level,
+    totalDamage: w.totalDamage,
+    weapons: w.weapons.map((x) => ({ name: x.def.name, level: x.level })),
+  };
+}
+
+function toggleFullscreen() {
+  if (desktop?.isDesktop) {
+    void desktop.window.toggleFullscreen();
+  } else if (document.fullscreenElement) {
+    void document.exitFullscreen();
+  } else {
+    void document.documentElement.requestFullscreen();
+  }
+}
+
+function openSettings() {
+  menu.showSettings({
+    volume: audio.volume,
+    isDesktop: Boolean(desktop?.isDesktop),
+    onVolume: (v) => audio.setVolume(v),
+    onFullscreen: toggleFullscreen,
+    onWindowSize: (w, h) => void desktop?.window.setWindowSize(w, h),
+    onBack: () => {
+      if (settingsReturn === "paused" && world) menu.showPause(runStats(world));
+      else showMenu();
+    },
+  });
+}
 
 const menu = new Menu((action) => {
   if (action === "play") startGame();
   else if (action === "menu") showMenu();
   else if (action === "quit") void desktop?.window.quit();
+  else if (action === "resume") resumeGame();
+  else if (action === "settings") openSettings();
 });
 
 function showMenu() {
   state = "menu";
   world = null;
+  audio.stopMusic();
   menu.showMain(Boolean(desktop?.isDesktop));
   hud.textContent = "";
   leveltag.textContent = "";
@@ -50,10 +90,60 @@ function startGame() {
     TEST_LEVEL,
     !NAIVE_MODE
   );
+  world.onEvent = (event) => {
+    switch (event) {
+      case "shoot":
+        audio.shoot();
+        break;
+      case "hit":
+        audio.hit();
+        break;
+      case "kill":
+        audio.kill();
+        break;
+      case "hurt":
+        audio.hurt();
+        break;
+      case "gem":
+        audio.gem();
+        break;
+      case "levelup":
+        audio.levelup();
+        break;
+      case "bossspawn":
+        audio.bossSpawn();
+        break;
+    }
+  };
   if (STRESS_COUNT > 0) world.stress(STRESS_COUNT);
+  state = "playing";
+  audio.ensure();
+  audio.startMusic();
+  menu.hide();
+}
+
+function pauseGame() {
+  if (state !== "playing" || !world) return;
+  state = "paused";
+  settingsReturn = "paused";
+  menu.showPause(runStats(world));
+}
+
+function resumeGame() {
+  if (state !== "paused") return;
   state = "playing";
   menu.hide();
 }
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (state === "playing") pauseGame();
+    else if (state === "paused") resumeGame();
+  } else if (e.key === "F11") {
+    e.preventDefault();
+    toggleFullscreen();
+  }
+});
 
 function openDraft() {
   if (!world) return;
@@ -62,6 +152,7 @@ function openDraft() {
   menu.showDraft(options, (index) => {
     if (!world) return;
     applyDraft(world, allWeapons, options[index]);
+    audio.pick();
     world.pendingLevels--;
     if (world.pendingLevels > 0) {
       openDraft();
@@ -113,10 +204,14 @@ startLoop(
       }
       if (world.victory) {
         state = "victory";
-        menu.showVictory(world.kills, world.time);
+        audio.stopMusic();
+        audio.victory();
+        menu.showVictory(runStats(world));
       } else if (!world.alive) {
         state = "gameover";
-        menu.showGameOver(world.kills, world.time);
+        audio.stopMusic();
+        audio.gameover();
+        menu.showGameOver(runStats(world));
       } else if (world.pendingLevels > 0 && STRESS_COUNT === 0) {
         openDraft();
       }

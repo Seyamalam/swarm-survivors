@@ -89,8 +89,10 @@ export class World {
 
   kills = 0;
   time = 0;
+  totalDamage = 0;
   victory = false;
   boss: Enemy | null = null;
+  onEvent?: (event: string) => void;
 
   private spawnTimer = 0;
   private bossSpawned = false;
@@ -204,7 +206,10 @@ export class World {
     if (wave.boss && !this.bossSpawned) {
       this.bossSpawned = true;
       const def = this.enemyDefs.find((d) => d.id === wave.boss);
-      if (def) this.boss = this.spawn(def);
+      if (def) {
+        this.boss = this.spawn(def);
+        this.onEvent?.("bossspawn");
+      }
     }
 
     this.spawnTimer -= dt;
@@ -262,6 +267,7 @@ export class World {
           this.hp -= e.def.damage;
           this.invuln = this.config.invulnTime;
           this.shake = Math.min(1, this.shake + 0.3);
+          this.onEvent?.("hurt");
           const dir = d || 1;
           e.kx = ((e.x - this.playerX) / dir) * KNOCKBACK_FORCE;
           e.ky = ((e.y - this.playerY) / dir) * KNOCKBACK_FORCE;
@@ -310,6 +316,8 @@ export class World {
 
   damageEnemy(e: Enemy, amount: number) {
     e.hp -= amount;
+    this.totalDamage += amount;
+    this.onEvent?.("hit");
     e.flash = 0.18;
     this.dmgNumbers.spawn(e.x, e.y - e.def.size / 2, amount);
     this.particles.emit(e.x, e.y, {
@@ -420,6 +428,7 @@ export class World {
   }
 
   private fireProjectiles(s: Record<string, number>) {
+    this.onEvent?.("shoot");
     const target = this.nearestEnemy();
     const bx = target ? target.x - this.playerX : this.lastMoveX;
     const by = target ? target.y - this.playerY : this.lastMoveY;
@@ -437,6 +446,7 @@ export class World {
   }
 
   private fireNova(s: Record<string, number>) {
+    this.onEvent?.("shoot");
     for (let i = 0; i < s.count; i++) {
       const a = (i / s.count) * Math.PI * 2;
       this.projectiles.push(
@@ -505,6 +515,7 @@ export class World {
         gs[i] = gs[gs.length - 1];
         gs.pop();
         this.gemPool.push(g);
+        this.onEvent?.("gem");
         this.gainXp(g.xp);
       }
     }
@@ -517,6 +528,7 @@ export class World {
       this.level++;
       this.xpNext = 8 + (this.level - 1) * 6;
       this.pendingLevels++;
+      this.onEvent?.("levelup");
       this.particles.emit(this.playerX, this.playerY, {
         count: 24,
         speed: 300,
@@ -537,6 +549,7 @@ export class World {
         es.pop();
         this.enemyPool.push(e);
         this.kills++;
+        this.onEvent?.("kill");
 
         const g = this.gemPool.pop() ?? ({} as Gem);
         g.x = e.x;

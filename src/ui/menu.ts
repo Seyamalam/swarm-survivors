@@ -9,6 +9,43 @@ export interface DraftCard {
   level?: number;
 }
 
+export interface RunStats {
+  kills: number;
+  time: number;
+  level: number;
+  totalDamage: number;
+  weapons: { name: string; level: number }[];
+}
+
+export interface SettingsCallbacks {
+  volume: number;
+  isDesktop: boolean;
+  onVolume: (v: number) => void;
+  onFullscreen: () => void;
+  onWindowSize: (w: number, h: number) => void;
+  onBack: () => void;
+}
+
+function fmtTime(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${String(sec).padStart(2, "0")}`;
+}
+
+function statsHtml(stats: RunStats): string {
+  const dps = stats.time > 0 ? Math.round(stats.totalDamage / stats.time) : 0;
+  const rows = [
+    ["Survived", fmtTime(stats.time)],
+    ["Kills", String(stats.kills)],
+    ["Level", String(stats.level)],
+    ["DPS", String(dps)],
+    ...stats.weapons.map((w) => [w.name, `Lv ${w.level}`] as [string, string]),
+  ];
+  return `<table class="stats">${rows
+    .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
+    .join("")}</table>`;
+}
+
 export class Menu {
   private root: HTMLDivElement;
 
@@ -23,27 +60,100 @@ export class Menu {
   }
 
   showMain(isDesktop: boolean) {
-    const buttons: MenuButton[] = [{ label: "Play", action: "play" }];
+    const buttons: MenuButton[] = [
+      { label: "Play", action: "play" },
+      { label: "Settings", action: "settings" },
+    ];
     if (isDesktop) buttons.push({ label: "Quit", action: "quit" });
-    this.render("Swarm Survivors", "prototype build", buttons);
-  }
-
-  showGameOver(kills: number, time: number) {
-    this.render("Game Over", `${kills} kills · survived ${time.toFixed(1)}s`, [
-      { label: "Retry", action: "play" },
-      { label: "Menu", action: "menu" },
-    ]);
-  }
-
-  showVictory(kills: number, time: number) {
     this.render(
-      "Victory!",
-      `Hive Tyrant slain · ${kills} kills · ${time.toFixed(1)}s`,
-      [
-        { label: "Play Again", action: "play" },
-        { label: "Menu", action: "menu" },
-      ]
+      '<span class="logo">Swarm Survivors</span>',
+      "Outlast the swarm. WASD to move — weapons fire themselves.",
+      buttons
     );
+  }
+
+  showPause(stats: RunStats) {
+    this.root.innerHTML = `
+      <div class="panel">
+        <h1>Paused</h1>
+        ${statsHtml(stats)}
+        <button data-action="resume">Resume</button>
+        <button data-action="settings">Settings</button>
+        <button data-action="play">Restart</button>
+        <button data-action="menu">Menu</button>
+      </div>`;
+    this.root.classList.add("visible");
+  }
+
+  showSettings(cb: SettingsCallbacks) {
+    this.root.innerHTML = `
+      <div class="panel">
+        <h1>Settings</h1>
+        <div class="setting-row">
+          <label for="vol">Volume</label>
+          <input id="vol" type="range" min="0" max="100" value="${Math.round(cb.volume * 100)}" />
+        </div>
+        <div class="setting-row">
+          <label>Fullscreen</label>
+          <button class="inline" data-setting="fullscreen">Toggle (F11)</button>
+        </div>
+        ${
+          cb.isDesktop
+            ? `<div class="setting-row">
+          <label>Window</label>
+          <span>
+            <button class="inline" data-size="1280x720">1280×720</button>
+            <button class="inline" data-size="1600x900">1600×900</button>
+            <button class="inline" data-size="1920x1080">1920×1080</button>
+          </span>
+        </div>`
+            : ""
+        }
+        <button data-setting="back">Back</button>
+      </div>`;
+    this.root.classList.add("visible");
+
+    this.root.querySelector("#vol")?.addEventListener("input", (e) => {
+      cb.onVolume(Number((e.target as HTMLInputElement).value) / 100);
+    });
+    this.root
+      .querySelector('[data-setting="fullscreen"]')
+      ?.addEventListener("click", () => {
+        cb.onFullscreen();
+      });
+    for (const btn of this.root.querySelectorAll("[data-size]")) {
+      btn.addEventListener("click", () => {
+        const [w, h] = (btn.getAttribute("data-size") ?? "1280x720")
+          .split("x")
+          .map(Number);
+        cb.onWindowSize(w, h);
+      });
+    }
+    this.root
+      .querySelector('[data-setting="back"]')
+      ?.addEventListener("click", () => {
+        cb.onBack();
+      });
+  }
+
+  showGameOver(stats: RunStats) {
+    this.renderEnd("Game Over", "The swarm claims another.", stats);
+  }
+
+  showVictory(stats: RunStats) {
+    this.renderEnd("Victory!", "Hive Tyrant slain.", stats);
+  }
+
+  private renderEnd(title: string, subtitle: string, stats: RunStats) {
+    this.root.innerHTML = `
+      <div class="panel">
+        <h1>${title}</h1>
+        <p>${subtitle}</p>
+        ${statsHtml(stats)}
+        <button data-action="play">Play Again</button>
+        <button data-action="menu">Menu</button>
+      </div>`;
+    this.root.classList.add("visible");
   }
 
   showDraft(options: DraftCard[], onPick: (index: number) => void) {

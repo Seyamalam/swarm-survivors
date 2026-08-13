@@ -12,6 +12,7 @@ interface DesktopRuntime {
   window: {
     quit: () => Promise<void>;
     toggleFullscreen: () => Promise<boolean>;
+    setWindowSize: (width: number, height: number) => Promise<unknown>;
     getMetrics: () => Promise<DesktopMetrics>;
   };
 }
