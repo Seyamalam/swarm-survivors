@@ -2,19 +2,24 @@ import { Renderer } from "./engine/renderer";
 import { Input } from "./engine/input";
 import { startLoop } from "./engine/loop";
 import { World, TEST_LEVEL } from "./game/world";
-import type { EnemyDef, WeaponDef } from "./game/types";
+import { generateDraft, applyDraft } from "./game/upgrades";
+import type { EnemyDef, WeaponDef, Wave } from "./game/types";
 import { Menu } from "./ui/menu";
 import enemyDefs from "./data/enemies.json";
 import weaponDefs from "./data/weapons.json";
+import waves from "./data/waves.json";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game")!;
 const hud = document.querySelector<HTMLDivElement>("#hud")!;
+const xpbar = document.querySelector<HTMLDivElement>("#xpbar")!;
+const leveltag = document.querySelector<HTMLDivElement>("#leveltag")!;
 
 const renderer = new Renderer(canvas);
 const input = new Input(window);
 const desktop = window.desktopRuntime;
+const allWeapons = weaponDefs as WeaponDef[];
 
-type State = "menu" | "playing" | "gameover";
+type State = "menu" | "playing" | "draft" | "gameover" | "victory";
 let state: State = "menu";
 let world: World | null = null;
 
@@ -29,16 +34,36 @@ function showMenu() {
   world = null;
   menu.showMain(Boolean(desktop?.isDesktop));
   hud.textContent = "";
+  leveltag.textContent = "";
+  xpbar.style.width = "0%";
 }
 
 function startGame() {
   world = new World(
     enemyDefs as EnemyDef[],
-    weaponDefs[0] as WeaponDef,
+    allWeapons,
+    waves as Wave[],
     TEST_LEVEL
   );
   state = "playing";
   menu.hide();
+}
+
+function openDraft() {
+  if (!world) return;
+  state = "draft";
+  const options = generateDraft(world, allWeapons);
+  menu.showDraft(options, (index) => {
+    if (!world) return;
+    applyDraft(world, allWeapons, options[index]);
+    world.pendingLevels--;
+    if (world.pendingLevels > 0) {
+      openDraft();
+    } else {
+      menu.hide();
+      state = "playing";
+    }
+  });
 }
 
 showMenu();
@@ -76,9 +101,14 @@ startLoop(
   (dt) => {
     if (state === "playing" && world) {
       world.update(dt, input.moveX, input.moveY);
-      if (!world.alive) {
+      if (world.victory) {
+        state = "victory";
+        menu.showVictory(world.kills, world.time);
+      } else if (!world.alive) {
         state = "gameover";
         menu.showGameOver(world.kills, world.time);
+      } else if (world.pendingLevels > 0) {
+        openDraft();
       }
     }
   },
@@ -108,6 +138,24 @@ startLoop(
     if (world) {
       drawArena(world.config.arenaHalfSize);
 
+      for (const w of world.weapons) {
+        if (w.def.type === "aura") {
+          const radius = world.auraRadius(w);
+          renderer.push({
+            x: world.playerX,
+            y: world.playerY,
+            w: radius * 2,
+            h: radius * 2,
+            r: 0.5,
+            g: 0.8,
+            b: 1,
+            a: 0.08,
+          });
+        }
+      }
+
+      const flash =
+        world.invuln > 0 ? 0.45 + 0.35 * Math.sin(world.time * 40) : 1;
       renderer.push({
         x: world.playerX,
         y: world.playerY,
@@ -116,11 +164,11 @@ startLoop(
         r: 0.4,
         g: 0.85,
         b: 1,
-        a: 1,
+        a: flash,
       });
 
       const barW = 48;
-      const hpFrac = Math.max(0, world.hp / world.config.playerMaxHp);
+      const hpFrac = Math.max(0, world.hp / world.maxHp);
       renderer.push({
         x: world.playerX,
         y: world.playerY - 38,
@@ -142,6 +190,19 @@ startLoop(
         a: 1,
       });
 
+      for (const g2 of world.gems) {
+        renderer.push({
+          x: g2.x,
+          y: g2.y,
+          w: 12,
+          h: 12,
+          r: 0.24,
+          g: 0.86,
+          b: 0.52,
+          a: 1,
+        });
+      }
+
       for (const e of world.enemies) {
         const [r, g, b] = e.def.color;
         renderer.push({
@@ -156,12 +217,29 @@ startLoop(
         });
       }
 
+      for (const w of world.weapons) {
+        if (w.def.type === "orbit") {
+          for (const orb of world.orbitPositions(w)) {
+            renderer.push({
+              x: orb.x,
+              y: orb.y,
+              w: orb.size,
+              h: orb.size,
+              r: 0.55,
+              g: 0.9,
+              b: 1,
+              a: 0.95,
+            });
+          }
+        }
+      }
+
       for (const p of world.projectiles) {
         renderer.push({
           x: p.x,
           y: p.y,
-          w: 14,
-          h: 14,
+          w: p.size,
+          h: p.size,
           r: 1,
           g: 0.95,
           b: 0.5,
@@ -169,11 +247,17 @@ startLoop(
         });
       }
 
+      xpbar.style.width = `${Math.min(100, (world.xp / world.xpNext) * 100)}%`;
+      leveltag.textContent = `Lv ${world.level}`;
+
       const heapMb = performance.memory
         ? Math.round(performance.memory.usedJSHeapSize / 1048576)
         : "?";
       const vramKb = Math.round(renderer.vramBytes / 1024);
-      const line1 = `hp: ${Math.ceil(world.hp)} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s`;
+      const bossText = world.boss
+        ? ` | BOSS: ${Math.ceil(world.boss.hp)}/${world.boss.maxHp}`
+        : "";
+      const line1 = `hp: ${Math.ceil(world.hp)}/${world.maxHp} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s${bossText}`;
       const line2 =
         `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB` +
         (desktopMetrics

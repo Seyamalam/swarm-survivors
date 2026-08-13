@@ -93,10 +93,10 @@ The codebase is split so each member owns a separable area:
 - [x] Auto-firing weapons driven by `src/data/weapons.json`
 - [x] HUD + menus
 - [ ] Spatial hash grid for collision (naive O(n²) dies ~1k enemies — this is the CG talking point)
-- [ ] Multiple simultaneous weapons + upgrades
-- [ ] XP gems, leveling, 3-card upgrade draft
+- [x] Multiple simultaneous weapons + upgrades
+- [x] XP gems, leveling, 3-card upgrade draft
 - [ ] Particle system + damage numbers
-- [ ] One boss wave at 10 minutes
+- [x] One boss wave at 10 minutes
 
 **Explicitly out of scope:** meta-progression saves, multiple stages/characters, online anything.
 

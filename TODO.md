@@ -2,25 +2,25 @@
 
 Status: `todo` → `doing` → `done`. Owner key: **M1** engine core, **M2** content/data, **M3** VFX/juice, **M4** UI/menus.
 
-## Milestone 1 — Core loop (playable end-to-end)
+## Milestone 1 — Core loop (playable end-to-end) ✅
 
 - [x] Instanced WebGL2 quad renderer (M1)
 - [x] Game loop, input, camera follow (M1)
 - [x] Main menu + game over + retry (M4)
 - [x] Test level: bounded arena, spawning, auto-fire, HP/death (M1)
-- [ ] Player/enemy contact knockback + brief invulnerability window (M1)
-- [ ] Enemy separation so they don't stack on one tile (M1)
-- [ ] Kill → XP gem drops, pickup radius, XP bar (M1)
+- [x] Player/enemy contact knockback + brief invulnerability window (M1)
+- [x] Enemy separation so they don't stack on one tile (M1)
+- [x] Kill → XP gem drops, pickup radius, XP bar (M1)
 
-## Milestone 2 — Roguelike systems
+## Milestone 2 — Roguelike systems ✅
 
-- [ ] Level-up → 3-card upgrade draft screen (M4)
-- [ ] Weapon system: multiple equipped weapons, per-weapon cooldowns (M1)
-- [ ] Upgrade system: damage/speed/area/projectile-count modifiers (M1)
-- [ ] 10 weapons with 8 levels each, defined in `src/data/weapons.json` (M2)
-- [ ] 15+ enemy types + spawn waves over time in `src/data/enemies.json` / `waves.json` (M2)
-- [ ] 10-minute run timer with escalating wave table (M2)
-- [ ] Final boss wave at 10:00 (M1 + M2)
+- [x] Level-up → 3-card upgrade draft screen (M4)
+- [x] Weapon system: multiple equipped weapons, per-weapon cooldowns (M1)
+- [x] Upgrade system: damage/speed/area/projectile-count modifiers (M1)
+- [x] 10 weapons with 8 levels each, defined in `src/data/weapons.json` (M2)
+- [x] 15+ enemy types + spawn waves over time in `src/data/enemies.json` / `waves.json` (M2)
+- [x] 10-minute run timer with escalating wave table (M2)
+- [x] Final boss wave at 10:00 (M1 + M2)
 
 ## Milestone 3 — CG showcase (the grading material)
 

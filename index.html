@@ -5,31 +5,126 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Swarm Survivors</title>
     <style>
-      html, body { margin: 0; height: 100%; background: #0b0e14; overflow: hidden; }
-      #game { display: block; width: 100vw; height: 100vh; }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0e14;
+        overflow: hidden;
+      }
+      #game {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
       #hud {
-        position: fixed; top: 12px; left: 12px; color: #e6e6e6;
-        font: 14px/1.4 system-ui, sans-serif; user-select: none; pointer-events: none;
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        color: #e6e6e6;
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+        user-select: none;
+        pointer-events: none;
         text-shadow: 0 1px 2px #000;
       }
       #menu-overlay {
-        position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-        background: rgba(6, 8, 12, 0.75); font-family: system-ui, sans-serif;
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 8, 12, 0.75);
+        font-family: system-ui, sans-serif;
       }
-      #menu-overlay.visible { display: flex; }
-      #menu-overlay .panel { text-align: center; color: #e6e6e6; }
-      #menu-overlay h1 { font-size: 48px; margin: 0 0 4px; letter-spacing: 2px; }
-      #menu-overlay p { color: #9aa4b2; margin: 0 0 28px; }
+      #menu-overlay.visible {
+        display: flex;
+      }
+      #menu-overlay .panel {
+        text-align: center;
+        color: #e6e6e6;
+      }
+      #menu-overlay h1 {
+        font-size: 48px;
+        margin: 0 0 4px;
+        letter-spacing: 2px;
+      }
+      #menu-overlay p {
+        color: #9aa4b2;
+        margin: 0 0 28px;
+      }
       #menu-overlay button {
-        display: block; width: 240px; margin: 10px auto; padding: 12px 0;
-        font-size: 18px; color: #e6e6e6; background: #1a2230; border: 1px solid #33415c;
-        border-radius: 6px; cursor: pointer;
+        display: block;
+        width: 240px;
+        margin: 10px auto;
+        padding: 12px 0;
+        font-size: 18px;
+        color: #e6e6e6;
+        background: #1a2230;
+        border: 1px solid #33415c;
+        border-radius: 6px;
+        cursor: pointer;
       }
-      #menu-overlay button:hover { background: #253248; }
+      #menu-overlay button:hover {
+        background: #253248;
+      }
+      #menu-overlay .cards {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+      }
+      #menu-overlay .card {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 200px;
+        padding: 18px 14px;
+        font-size: 15px;
+        text-align: left;
+      }
+      #menu-overlay .card strong {
+        font-size: 17px;
+      }
+      #menu-overlay .card span {
+        color: #9aa4b2;
+      }
+      #menu-overlay .card .lvl {
+        color: #6fd3ff;
+        font-size: 13px;
+      }
+      #xpwrap {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: #161b26;
+        pointer-events: none;
+      }
+      #xpbar {
+        height: 100%;
+        width: 0%;
+        background: #3ddc84;
+        transition: width 0.15s;
+      }
+      #leveltag {
+        position: fixed;
+        top: 16px;
+        right: 14px;
+        color: #e6e6e6;
+        font:
+          14px system-ui,
+          sans-serif;
+        text-shadow: 0 1px 2px #000;
+        pointer-events: none;
+      }
     </style>
   </head>
   <body>
     <canvas id="game"></canvas>
+    <div id="xpwrap"><div id="xpbar"></div></div>
+    <div id="leveltag"></div>
     <div id="hud"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

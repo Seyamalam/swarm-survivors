@@ -1,0 +1,55 @@
+[
+  { "time": 0, "spawnInterval": 0.7, "enemies": ["crawler"] },
+  { "time": 25, "spawnInterval": 0.55, "enemies": ["crawler", "runner"] },
+  {
+    "time": 60,
+    "spawnInterval": 0.45,
+    "enemies": ["crawler", "runner", "swarmling"]
+  },
+  {
+    "time": 100,
+    "spawnInterval": 0.4,
+    "enemies": ["runner", "swarmling", "spitter"]
+  },
+  {
+    "time": 150,
+    "spawnInterval": 0.35,
+    "enemies": ["swarmling", "spitter", "stalker"]
+  },
+  {
+    "time": 200,
+    "spawnInterval": 0.3,
+    "enemies": ["stalker", "brute", "shielder"]
+  },
+  {
+    "time": 260,
+    "spawnInterval": 0.28,
+    "enemies": ["imp", "leech", "brute", "stalker"]
+  },
+  {
+    "time": 320,
+    "spawnInterval": 0.25,
+    "enemies": ["imp", "wraith", "bomber", "shielder"]
+  },
+  {
+    "time": 400,
+    "spawnInterval": 0.22,
+    "enemies": ["wraith", "sentinel", "ravager", "bomber"]
+  },
+  {
+    "time": 480,
+    "spawnInterval": 0.2,
+    "enemies": ["ravager", "golem", "sentinel", "leech"]
+  },
+  {
+    "time": 560,
+    "spawnInterval": 0.15,
+    "enemies": ["golem", "titan", "ravager", "wraith", "swarmling"]
+  },
+  {
+    "time": 600,
+    "spawnInterval": 0.3,
+    "enemies": ["ravager", "wraith", "imp"],
+    "boss": "hive-tyrant"
+  }
+]

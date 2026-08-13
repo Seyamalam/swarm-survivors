@@ -5,12 +5,23 @@ export interface EnemyDef {
   size: number;
   color: [number, number, number];
   xp: number;
+  damage: number;
+  boss?: boolean;
 }
+
+export type WeaponType = "projectile" | "aura" | "orbit" | "nova";
 
 export interface WeaponDef {
   id: string;
   name: string;
-  damage: number;
-  cooldown: number;
-  projectileSpeed: number;
+  type: WeaponType;
+  description: string;
+  levels: Record<string, number>[];
+}
+
+export interface Wave {
+  time: number;
+  spawnInterval: number;
+  enemies: string[];
+  boss?: string;
 }

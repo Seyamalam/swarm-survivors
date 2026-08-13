@@ -24,7 +24,8 @@
     "package:linux": "electron-builder --config electron-builder.yml --linux --x64 --publish never",
     "deploy:itch:web": "bash scripts/publish-itch-web.sh",
     "prepare": "husky",
-    "screenshots": "node scripts/capture-screenshots.mjs"
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "test:smoke": "node scripts/smoke-test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
