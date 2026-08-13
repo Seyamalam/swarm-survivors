@@ -1,6 +1,14 @@
 [
-  { "time": 0, "spawnInterval": 0.7, "enemies": ["crawler"] },
-  { "time": 25, "spawnInterval": 0.55, "enemies": ["crawler", "runner"] },
+  {
+    "time": 0,
+    "spawnInterval": 0.7,
+    "enemies": ["crawler"]
+  },
+  {
+    "time": 25,
+    "spawnInterval": 0.55,
+    "enemies": ["crawler", "runner"]
+  },
   {
     "time": 60,
     "spawnInterval": 0.45,
@@ -13,17 +21,17 @@
   },
   {
     "time": 150,
-    "spawnInterval": 0.35,
+    "spawnInterval": 0.4,
     "enemies": ["swarmling", "spitter", "stalker"]
   },
   {
     "time": 200,
-    "spawnInterval": 0.3,
+    "spawnInterval": 0.34,
     "enemies": ["stalker", "brute", "shielder"]
   },
   {
     "time": 260,
-    "spawnInterval": 0.28,
+    "spawnInterval": 0.3,
     "enemies": ["imp", "leech", "brute", "stalker"]
   },
   {

@@ -48,7 +48,7 @@ export interface LevelConfig {
 
 export const TEST_LEVEL: LevelConfig = {
   arenaHalfSize: 2000,
-  playerMaxHp: 100,
+  playerMaxHp: 110,
   playerSpeed: 360,
   invulnTime: 0.5,
   maxEnemies: 350,
@@ -73,7 +73,7 @@ export class World {
 
   level = 1;
   xp = 0;
-  xpNext = 8;
+  xpNext = 6;
   pendingLevels = 0;
 
   weapons: WeaponInstance[] = [];
@@ -526,7 +526,7 @@ export class World {
     while (this.xp >= this.xpNext) {
       this.xp -= this.xpNext;
       this.level++;
-      this.xpNext = 8 + (this.level - 1) * 6;
+      this.xpNext = 6 + (this.level - 1) * 5;
       this.pendingLevels++;
       this.onEvent?.("levelup");
       this.particles.emit(this.playerX, this.playerY, {

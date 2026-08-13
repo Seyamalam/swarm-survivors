@@ -13,6 +13,7 @@ import waves from "./data/waves.json";
 const params = new URLSearchParams(window.location.search);
 const NAIVE_MODE = params.has("naive");
 const STRESS_COUNT = Number(params.get("stress") ?? 0);
+const SPEED = Math.max(1, Math.min(8, Number(params.get("speed") ?? 1)));
 
 const canvas = document.querySelector<HTMLCanvasElement>("#game")!;
 const hud = document.querySelector<HTMLDivElement>("#hud")!;
@@ -197,10 +198,12 @@ if (desktop?.isDesktop) {
 startLoop(
   (dt) => {
     if (state === "playing" && world) {
-      if (world.hitStop > 0) {
-        world.hitStop -= dt;
-      } else {
-        world.update(dt, input.moveX, input.moveY);
+      for (let i = 0; i < SPEED; i++) {
+        if (world.hitStop > 0) {
+          world.hitStop -= dt;
+        } else {
+          world.update(dt, input.moveX, input.moveY);
+        }
       }
       if (world.victory) {
         state = "victory";
@@ -481,3 +484,27 @@ window.__perf = () => ({
   bloom: renderer.bloomEnabled,
   naive: NAIVE_MODE,
 });
+
+window.__state = () => {
+  if (!world) return null;
+  let nearest: { dx: number; dy: number; d: number } | null = null;
+  for (const e of world.enemies) {
+    const dx = e.x - world.playerX;
+    const dy = e.y - world.playerY;
+    const d = Math.hypot(dx, dy);
+    if (!nearest || d < nearest.d) nearest = { dx, dy, d };
+  }
+  return {
+    time: world.time,
+    hp: world.hp,
+    maxHp: world.maxHp,
+    level: world.level,
+    kills: world.kills,
+    enemies: world.enemies.length,
+    nearest,
+    boss: world.boss ? world.boss.hp : null,
+    victory: world.victory,
+    alive: world.alive,
+    weapons: world.weapons.map((w) => `${w.def.id}:${w.level}`),
+  };
+};

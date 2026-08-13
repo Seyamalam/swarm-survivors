@@ -46,3 +46,21 @@ interface PerfSnapshot {
 interface Window {
   __perf?: () => PerfSnapshot;
 }
+
+interface BotState {
+  time: number;
+  hp: number;
+  maxHp: number;
+  level: number;
+  kills: number;
+  enemies: number;
+  nearest: { dx: number; dy: number; d: number } | null;
+  boss: number | null;
+  victory: boolean;
+  alive: boolean;
+  weapons: string[];
+}
+
+interface Window {
+  __state?: () => BotState | null;
+}

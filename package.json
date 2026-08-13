@@ -26,7 +26,8 @@
     "prepare": "husky",
     "screenshots": "node scripts/capture-screenshots.mjs",
     "test:smoke": "node scripts/smoke-test.mjs",
-    "benchmark": "node scripts/benchmark.mjs"
+    "benchmark": "node scripts/benchmark.mjs",
+    "bot": "node scripts/balance-bot.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -24,15 +24,23 @@ swarm-survivors/
 ├── scripts/
 │   ├── capture-screenshots.mjs   # Headless Playwright: builds game, screenshots menu+gameplay for README
 │   ├── smoke-test.mjs            # Headless end-to-end playtest: moves, drafts upgrades, asserts loop works
+│   ├── balance-bot.mjs           # Kiting AI bot for automated balance runs (BOT_SPEED/BOT_WALL env)
 │   ├── benchmark.mjs             # naive vs optimized stress benchmark → docs/benchmark.md + .json
 │   └── publish-itch-web.sh       # Butler push of dist/ to the itch.io html5 channel with retries
 │
 ├── docs/
-│   └── screenshots/              # Auto-regenerated README screenshots (menu.png, gameplay.png)
+│   ├── screenshots/              # Auto-regenerated README screenshots (menu.png, gameplay.png)
+│   ├── benchmark.md/.json        # naive vs optimized perf report (npm run benchmark)
+│   ├── report.md                 # Technical/grading report: CG techniques + benchmark
+│   ├── itch-page.md              # Copy-paste content for the itch.io store page
+│   └── sprite-prompts.md         # AI image-gen brief for character/item sprites
 │
 └── src/
     ├── main.ts                   # Entry: game state machine, camera shake, all rendering, HUD/perf overlay
     ├── desktop.d.ts              # Window/Performance type declarations for Electron IPC and perf hook
+    │
+    ├── audio/
+    │   └── audio.ts              # Procedural WebAudio: synthesized SFX + generative music, volume persistence
     │
     ├── engine/
     │   ├── renderer.ts           # WebGL2 instanced sprite renderer: procedural texture atlas, per-instance UV/flash, bloom post pipeline, naive mode for benchmarks
