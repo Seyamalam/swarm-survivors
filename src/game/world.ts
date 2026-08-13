@@ -36,6 +36,25 @@ export interface Gem {
   x: number;
   y: number;
   xp: number;
+  tier: number;
+}
+
+export const GEM_TIERS: {
+  size: number;
+  color: [number, number, number];
+  sprite: string;
+}[] = [
+  { size: 16, color: [0.24, 0.86, 0.52], sprite: "gem" },
+  { size: 20, color: [0.35, 0.65, 1], sprite: "gem-rare" },
+  { size: 24, color: [0.7, 0.4, 1], sprite: "gem-epic" },
+  { size: 30, color: [1, 0.8, 0.25], sprite: "gem-legendary" },
+];
+
+export function gemTierFor(xp: number): number {
+  if (xp >= 50) return 3;
+  if (xp >= 5) return 2;
+  if (xp >= 3) return 1;
+  return 0;
 }
 
 export interface LevelConfig {
@@ -94,6 +113,7 @@ export class World {
   victory = false;
   boss: Enemy | null = null;
   onEvent?: (event: string) => void;
+  spawnRadius = 750;
 
   private spawnTimer = 0;
   private bossSpawned = false;
@@ -229,7 +249,7 @@ export class World {
 
   private spawn(def: EnemyDef): Enemy {
     const angle = Math.random() * Math.PI * 2;
-    const radius = 750 + Math.random() * 250;
+    const radius = this.spawnRadius + Math.random() * 250;
     const e = this.enemyPool.pop() ?? ({} as Enemy);
     e.id = this.nextEnemyId++;
     e.x = this.playerX + Math.cos(angle) * radius;
@@ -276,6 +296,12 @@ export class World {
           this.invuln = this.config.invulnTime;
           this.shake = Math.min(1, this.shake + 0.3);
           this.onEvent?.("hurt");
+          this.dmgNumbers.spawn(
+            this.playerX,
+            this.playerY - 30,
+            e.def.damage,
+            [1, 0.35, 0.3]
+          );
           const dir = d || 1;
           e.kx = ((e.x - this.playerX) / dir) * KNOCKBACK_FORCE;
           e.ky = ((e.y - this.playerY) / dir) * KNOCKBACK_FORCE;
@@ -563,6 +589,7 @@ export class World {
         g.x = e.x;
         g.y = e.y;
         g.xp = e.def.xp;
+        g.tier = gemTierFor(e.def.xp);
         this.gems.push(g);
 
         this.particles.emit(e.x, e.y, {

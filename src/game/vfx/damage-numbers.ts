@@ -4,6 +4,9 @@ export interface DamageNumber {
   life: number;
   maxLife: number;
   value: number;
+  r: number;
+  g: number;
+  b: number;
 }
 
 const MAX_NUMBERS = 128;
@@ -14,7 +17,12 @@ export class DamageNumbers {
   items: DamageNumber[] = [];
   private freelist: DamageNumber[] = [];
 
-  spawn(x: number, y: number, value: number) {
+  spawn(
+    x: number,
+    y: number,
+    value: number,
+    color: [number, number, number] = [1, 0.95, 0.6]
+  ) {
     if (this.items.length >= MAX_NUMBERS) return;
     const n = this.freelist.pop() ?? ({} as DamageNumber);
     n.x = x + (Math.random() - 0.5) * 16;
@@ -22,6 +30,7 @@ export class DamageNumbers {
     n.value = Math.round(value);
     n.maxLife = LIFETIME;
     n.life = LIFETIME;
+    [n.r, n.g, n.b] = color;
     this.items.push(n);
   }
 

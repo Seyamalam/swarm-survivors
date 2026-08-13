@@ -1,7 +1,7 @@
 import { Renderer, UV } from "./engine/renderer";
 import { Input } from "./engine/input";
 import { startLoop } from "./engine/loop";
-import { World, TEST_LEVEL } from "./game/world";
+import { World, TEST_LEVEL, GEM_TIERS } from "./game/world";
 import { generateDraft, applyDraft } from "./game/upgrades";
 import type { EnemyDef, WeaponDef, Wave } from "./game/types";
 import { Menu, type RunStats } from "./ui/menu";
@@ -31,12 +31,19 @@ const enemySpriteName = (def: EnemyDef) =>
 const spriteNames = [
   "player",
   "gem",
+  "gem-rare",
+  "gem-epic",
+  "gem-legendary",
   "bolt",
   ...(enemyDefs as EnemyDef[]).map(enemySpriteName),
 ];
 void renderer.loadSprites(
   spriteNames.map((name) => ({ name, url: `sprites/${name}.png` }))
 );
+
+const ZOOM_KEY = "swarm-survivors-zoom";
+const savedZoom = Number(localStorage.getItem(ZOOM_KEY));
+if (savedZoom >= 0.4 && savedZoom <= 2.5) renderer.setZoom(savedZoom);
 
 type State = "menu" | "playing" | "paused" | "draft" | "gameover" | "victory";
 let state: State = "menu";
@@ -66,8 +73,13 @@ function toggleFullscreen() {
 function openSettings() {
   menu.showSettings({
     volume: audio.volume,
+    zoom: renderer.getZoom(),
     isDesktop: Boolean(desktop?.isDesktop),
     onVolume: (v) => audio.setVolume(v),
+    onZoom: (z) => {
+      renderer.setZoom(z);
+      localStorage.setItem(ZOOM_KEY, String(z));
+    },
     onFullscreen: toggleFullscreen,
     onWindowSize: (w, h) => void desktop?.window.setWindowSize(w, h),
     onBack: () => {
@@ -249,6 +261,12 @@ startLoop(
       statLast = now;
     }
     renderer.resize();
+    if (world) {
+      world.spawnRadius = Math.max(
+        750,
+        canvas.width / 2 / renderer.getZoom() + 150
+      );
+    }
     let camX = world?.playerX ?? 0;
     let camY = world?.playerY ?? 0;
     if (world && world.shake > 0) {
@@ -319,18 +337,20 @@ startLoop(
         a: 1,
       });
 
-      const gemUV = renderer.spriteUV("gem");
+      const gemUVs = GEM_TIERS.map((t) => renderer.spriteUV(t.sprite));
       for (const g2 of world.gems) {
+        const tier = GEM_TIERS[g2.tier] ?? GEM_TIERS[0];
+        const sprite = gemUVs[g2.tier] ?? gemUVs[0];
         renderer.push({
           x: g2.x,
           y: g2.y,
-          w: 18,
-          h: 18,
-          r: gemUV ? 1 : 0.24,
-          g: gemUV ? 1 : 0.86,
-          b: gemUV ? 1 : 0.52,
+          w: tier.size,
+          h: tier.size,
+          r: sprite ? 1 : tier.color[0],
+          g: sprite ? 1 : tier.color[1],
+          b: sprite ? 1 : tier.color[2],
           a: 1,
-          uv: gemUV ?? UV.diamond,
+          uv: sprite ?? UV.diamond,
         });
       }
 
@@ -413,9 +433,9 @@ startLoop(
             y: dn.y,
             w: dw,
             h: dh,
-            r: 1,
-            g: 0.95,
-            b: 0.6,
+            r: dn.r,
+            g: dn.g,
+            b: dn.b,
             a: alpha,
             uv: UV.digit(Number(digits[i])),
           });
@@ -452,8 +472,9 @@ startLoop(
 );
 
 function drawGrid(camX: number, camY: number) {
-  const halfW = canvas.width / 2;
-  const halfH = canvas.height / 2;
+  const zoom = renderer.getZoom();
+  const halfW = canvas.width / 2 / zoom;
+  const halfH = canvas.height / 2 / zoom;
   const x0 = Math.floor((camX - halfW) / GRID_SPACING) * GRID_SPACING;
   const y0 = Math.floor((camY - halfH) / GRID_SPACING) * GRID_SPACING;
 

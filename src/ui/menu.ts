@@ -19,8 +19,10 @@ export interface RunStats {
 
 export interface SettingsCallbacks {
   volume: number;
+  zoom: number;
   isDesktop: boolean;
   onVolume: (v: number) => void;
+  onZoom: (z: number) => void;
   onFullscreen: () => void;
   onWindowSize: (w: number, h: number) => void;
   onBack: () => void;
@@ -94,6 +96,10 @@ export class Menu {
           <input id="vol" type="range" min="0" max="100" value="${Math.round(cb.volume * 100)}" />
         </div>
         <div class="setting-row">
+          <label for="zoom">Zoom <span id="zoomval">${Math.round(cb.zoom * 100)}%</span></label>
+          <input id="zoom" type="range" min="60" max="200" value="${Math.round(cb.zoom * 100)}" />
+        </div>
+        <div class="setting-row">
           <label>Fullscreen</label>
           <button class="inline" data-setting="fullscreen">Toggle (F11)</button>
         </div>
@@ -115,6 +121,12 @@ export class Menu {
 
     this.root.querySelector("#vol")?.addEventListener("input", (e) => {
       cb.onVolume(Number((e.target as HTMLInputElement).value) / 100);
+    });
+    this.root.querySelector("#zoom")?.addEventListener("input", (e) => {
+      const z = Number((e.target as HTMLInputElement).value) / 100;
+      const label = this.root.querySelector("#zoomval");
+      if (label) label.textContent = `${Math.round(z * 100)}%`;
+      cb.onZoom(z);
     });
     this.root
       .querySelector('[data-setting="fullscreen"]')

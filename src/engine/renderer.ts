@@ -108,6 +108,7 @@ layout(location = 5) in float aFlash;
 layout(location = 6) in float aRot;
 uniform vec2 uResolution;
 uniform vec2 uCamera;
+uniform float uZoom;
 out vec2 vUV;
 out vec4 vColor;
 out float vFlash;
@@ -117,7 +118,7 @@ void main() {
   vec2 corner = aCorner * aSize;
   vec2 rotated = vec2(corner.x * cs - corner.y * sn, corner.x * sn + corner.y * cs);
   vec2 world = aPos + rotated;
-  vec2 screen = (world - uCamera) / uResolution * 2.0;
+  vec2 screen = (world - uCamera) * uZoom / uResolution * 2.0;
   gl_Position = vec4(screen.x, -screen.y, 0.0, 1.0);
   vUV = aUV.xy + (aCorner + 0.5) * aUV.zw;
   vColor = aColor;
@@ -203,6 +204,8 @@ export class Renderer {
   private capacity = INITIAL_CAPACITY;
   private uResolution: WebGLUniformLocation;
   private uCamera: WebGLUniformLocation;
+  private uZoom: WebGLUniformLocation;
+  private zoom = 1;
   private postVao: WebGLVertexArrayObject | null = null;
   private postBuffer: WebGLBuffer | null = null;
   private brightProgram: WebGLProgram | null = null;
@@ -229,6 +232,7 @@ export class Renderer {
     gl.useProgram(this.program);
     this.uResolution = this.uniform("uResolution");
     this.uCamera = this.uniform("uCamera");
+    this.uZoom = this.uniform("uZoom");
 
     this.vao = gl.createVertexArray()!;
     gl.bindVertexArray(this.vao);
@@ -378,6 +382,14 @@ export class Renderer {
     return this.spriteUVs.get(name);
   }
 
+  setZoom(z: number) {
+    this.zoom = Math.max(0.4, Math.min(2.5, z));
+  }
+
+  getZoom() {
+    return this.zoom;
+  }
+
   async loadSprites(
     manifest: { name: string; url: string }[]
   ): Promise<number> {
@@ -450,6 +462,7 @@ export class Renderer {
     gl.bindTexture(gl.TEXTURE_2D, this.atlasTex);
     gl.uniform2f(this.uResolution, this.canvas.width, this.canvas.height);
     gl.uniform2f(this.uCamera, cameraX, cameraY);
+    gl.uniform1f(this.uZoom, this.zoom);
     gl.clearColor(0.043, 0.055, 0.078, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
   }

@@ -37,6 +37,18 @@ When done, drop PNGs into `assets/sprites/` with the exact filenames below and t
 | `gem.png`              | Small glowing green crystal shard                                          |
 | `bolt.png`             | Glowing golden magic bolt projectile, slight motion trail                  |
 
+## Round 2 — gem rarity tiers + extras
+
+Same style rules as above. These drop into `assets/sprites/` with these exact filenames; the game picks them up automatically (colored fallback exists until then).
+
+| Filename            | Prompt seed                                           |
+| ------------------- | ----------------------------------------------------- |
+| `gem-rare.png`      | Small glowing blue crystal shard, brighter inner glow |
+| `gem-epic.png`      | Small glowing purple crystal shard, arcane sparkle    |
+| `gem-legendary.png` | Radiant golden crystal shard, brilliant halo          |
+
+Gem tiers in-game: common (green, 1–2 xp) → rare (blue, 3–4 xp) → epic (purple, 5–8 xp) → legendary (gold, boss/elite drops). Damage numbers when enemies hit the player are already rendered in-engine (red digits) — no art needed for those.
+
 ## Tips
 
 - Generate `player.png` and `crawler.png` first and check style consistency before batch-running the rest
