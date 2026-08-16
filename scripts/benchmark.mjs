@@ -47,6 +47,8 @@ try {
       await page.goto(`${BASE}?stress=${count}${naive ? "&naive=1" : ""}`);
       await page.waitForSelector('#menu-overlay.visible button[data-action="play"]');
       await page.click('button[data-action="play"]');
+await page.waitForSelector("[data-weapon]");
+await page.evaluate(() => document.querySelector("[data-weapon]").click());
       await page.waitForTimeout(2000);
 
       const samples = [];

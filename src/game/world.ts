@@ -29,7 +29,19 @@ export interface Projectile {
   size: number;
   speed: number;
   pierce: number;
+  weaponId: string;
   hitIds: number[];
+}
+
+export interface DyingEnemy {
+  x: number;
+  y: number;
+  size: number;
+  angle: number;
+  color: [number, number, number];
+  spriteId: string;
+  life: number;
+  maxLife: number;
 }
 
 export interface Gem {
@@ -103,6 +115,7 @@ export class World {
 
   readonly particles = new Particles();
   readonly dmgNumbers = new DamageNumbers();
+  dying: DyingEnemy[] = [];
   shake = 0;
   hitStop = 0;
   godMode = false;
@@ -131,12 +144,15 @@ export class World {
     allWeapons: WeaponDef[],
     private waves: Wave[],
     readonly config: LevelConfig,
-    readonly useSpatialHash = true
+    readonly useSpatialHash = true,
+    startWeaponId?: string
   ) {
     this.hp = config.playerMaxHp;
     this.maxHp = config.playerMaxHp;
     this.pickupRadius = config.pickupRadius;
-    this.addWeapon(allWeapons[0]);
+    const startWeapon =
+      allWeapons.find((w) => w.id === startWeaponId) ?? allWeapons[0];
+    this.addWeapon(startWeapon);
   }
 
   get alive() {
@@ -213,6 +229,14 @@ export class World {
     this.updateGems(dt);
     this.particles.update(dt);
     this.dmgNumbers.update(dt);
+    for (let i = this.dying.length - 1; i >= 0; i--) {
+      const d = this.dying[i];
+      d.life -= dt;
+      if (d.life <= 0) {
+        this.dying[i] = this.dying[this.dying.length - 1];
+        this.dying.pop();
+      }
+    }
     this.reapDead();
   }
 
@@ -372,7 +396,7 @@ export class World {
           w.timer -= dt;
           if (w.timer <= 0) {
             w.timer = s.cooldown;
-            this.fireProjectiles(s);
+            this.fireProjectiles(s, w.def.id);
           }
           break;
         }
@@ -380,7 +404,7 @@ export class World {
           w.timer -= dt;
           if (w.timer <= 0) {
             w.timer = s.cooldown;
-            this.fireNova(s);
+            this.fireNova(s, w.def.id);
           }
           break;
         }
@@ -445,6 +469,7 @@ export class World {
   private makeProjectile(
     angle: number,
     s: Record<string, number>,
+    weaponId: string,
     out: Projectile
   ): Projectile {
     out.x = this.playerX;
@@ -456,12 +481,13 @@ export class World {
     out.size = s.size;
     out.speed = s.speed;
     out.pierce = s.pierce;
+    out.weaponId = weaponId;
     if (!out.hitIds) out.hitIds = [];
     out.hitIds.length = 0;
     return out;
   }
 
-  private fireProjectiles(s: Record<string, number>) {
+  private fireProjectiles(s: Record<string, number>, weaponId: string) {
     this.onEvent?.("shoot");
     const target = this.nearestEnemy();
     const bx = target ? target.x - this.playerX : this.lastMoveX;
@@ -473,13 +499,14 @@ export class World {
         this.makeProjectile(
           baseAngle + spread,
           s,
+          weaponId,
           this.projectilePool.pop() ?? ({} as Projectile)
         )
       );
     }
   }
 
-  private fireNova(s: Record<string, number>) {
+  private fireNova(s: Record<string, number>, weaponId: string) {
     this.onEvent?.("shoot");
     for (let i = 0; i < s.count; i++) {
       const a = (i / s.count) * Math.PI * 2;
@@ -487,6 +514,7 @@ export class World {
         this.makeProjectile(
           a,
           s,
+          weaponId,
           this.projectilePool.pop() ?? ({} as Projectile)
         )
       );
@@ -584,6 +612,19 @@ export class World {
         this.enemyPool.push(e);
         this.kills++;
         this.onEvent?.("kill");
+
+        if (this.dying.length < 64) {
+          this.dying.push({
+            x: e.x,
+            y: e.y,
+            size: e.def.size,
+            angle: e.angle,
+            color: e.def.color,
+            spriteId: e.def.boss ? `boss-${e.def.id}` : e.def.id,
+            maxLife: 0.3,
+            life: 0.3,
+          });
+        }
 
         const g = this.gemPool.pop() ?? ({} as Gem);
         g.x = e.x;

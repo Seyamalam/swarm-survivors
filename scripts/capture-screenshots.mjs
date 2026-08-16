@@ -45,6 +45,8 @@ try {
   console.log("[screenshots] captured menu.png");
 
   await page.click('button[data-action="play"]');
+  await page.waitForSelector("[data-weapon]");
+  await page.evaluate(() => document.querySelector("[data-weapon]").click());
   await page.waitForTimeout(4000);
   await page.keyboard.down("d");
   await page.waitForTimeout(2500);

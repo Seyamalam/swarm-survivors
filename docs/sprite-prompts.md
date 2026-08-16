@@ -49,6 +49,27 @@ Same style rules as above. These drop into `assets/sprites/` with these exact fi
 
 Gem tiers in-game: common (green, 1–2 xp) → rare (blue, 3–4 xp) → epic (purple, 5–8 xp) → legendary (gold, boss/elite drops). Damage numbers when enemies hit the player are already rendered in-engine (red digits) — no art needed for those.
 
+## Round 3 — weapon projectiles + walk frames
+
+Same style rules. The game picks these up automatically when present (fallbacks exist).
+
+### Per-weapon projectile sprites
+
+| Filename               | Prompt seed                                |
+| ---------------------- | ------------------------------------------ |
+| `proj-magic-bolt.png`  | Glowing cyan magic bolt, sharp energy dart |
+| `proj-fireball.png`    | Roaring orange fireball, flaming trail     |
+| `proj-ice-shard.png`   | Jagged pale-blue ice shard, frosty edges   |
+| `proj-poison-dart.png` | Slim toxic-green dart, dripping venom      |
+| `proj-arc-nova.png`    | Crackling violet lightning orb             |
+| `proj-ember-nova.png`  | Heavy molten ember, glowing cracks         |
+
+### Walk-cycle second frames (flipbook)
+
+For each of the 16 enemies + boss from round 1, generate a **second frame of the same character mid-stride** (legs/wings/tentacles in the opposite position, identical style/colors/framing). Filename pattern: `<name>-walk2.png` — e.g. `crawler-walk2.png`, `boss-hive-tyrant-walk2.png`.
+
+Consistency trick: feed the round-1 image back as a reference and ask for "same character, mid-stride second animation frame".
+
 ## Tips
 
 - Generate `player.png` and `crawler.png` first and check style consistency before batch-running the rest

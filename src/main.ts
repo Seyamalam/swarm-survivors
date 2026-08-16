@@ -35,7 +35,11 @@ const spriteNames = [
   "gem-epic",
   "gem-legendary",
   "bolt",
-  ...(enemyDefs as EnemyDef[]).map(enemySpriteName),
+  ...allWeapons.map((w) => `proj-${w.id}`),
+  ...(enemyDefs as EnemyDef[]).flatMap((d) => {
+    const n = enemySpriteName(d);
+    return [n, `${n}-walk2`];
+  }),
 ];
 void renderer.loadSprites(
   spriteNames.map((name) => ({ name, url: `sprites/${name}.png` }))
@@ -45,7 +49,14 @@ const ZOOM_KEY = "swarm-survivors-zoom";
 const savedZoom = Number(localStorage.getItem(ZOOM_KEY));
 if (savedZoom >= 0.4 && savedZoom <= 2.5) renderer.setZoom(savedZoom);
 
-type State = "menu" | "playing" | "paused" | "draft" | "gameover" | "victory";
+type State =
+  | "menu"
+  | "weaponselect"
+  | "playing"
+  | "paused"
+  | "draft"
+  | "gameover"
+  | "victory";
 let state: State = "menu";
 let settingsReturn: "menu" | "paused" = "menu";
 let world: World | null = null;
@@ -90,12 +101,20 @@ function openSettings() {
 }
 
 const menu = new Menu((action) => {
-  if (action === "play") startGame();
+  if (action === "play") showWeaponSelect();
   else if (action === "menu") showMenu();
   else if (action === "quit") void desktop?.window.quit();
   else if (action === "resume") resumeGame();
   else if (action === "settings") openSettings();
 });
+
+function showWeaponSelect() {
+  state = "weaponselect";
+  menu.showWeaponSelect(
+    allWeapons.map((w) => ({ id: w.id, name: w.name, desc: w.description })),
+    (weaponId) => startGame(weaponId)
+  );
+}
 
 function showMenu() {
   state = "menu";
@@ -107,13 +126,14 @@ function showMenu() {
   xpbar.style.width = "0%";
 }
 
-function startGame() {
+function startGame(weaponId?: string) {
   world = new World(
     enemyDefs as EnemyDef[],
     allWeapons,
     waves as Wave[],
     TEST_LEVEL,
-    !NAIVE_MODE
+    !NAIVE_MODE,
+    weaponId
   );
   world.onEvent = (event) => {
     switch (event) {
@@ -354,14 +374,39 @@ startLoop(
         });
       }
 
+      for (const d of world.dying) {
+        const t = d.life / d.maxLife;
+        const sprite = renderer.spriteUV(d.spriteId);
+        const [r, g, b] = sprite ? [1, 1, 1] : d.color;
+        renderer.push({
+          x: d.x,
+          y: d.y,
+          w: d.size * (1 + (1 - t) * 0.5),
+          h: d.size * (1 + (1 - t) * 0.5),
+          r,
+          g,
+          b,
+          a: t * 0.8,
+          uv: sprite ?? UV.circle,
+          rot: d.angle - Math.PI / 2,
+        });
+      }
+
       for (const e of world.enemies) {
-        const sprite = renderer.spriteUV(enemySpriteName(e.def));
+        const name = enemySpriteName(e.def);
+        let sprite = renderer.spriteUV(name);
+        const walk2 = renderer.spriteUV(`${name}-walk2`);
+        if (sprite && walk2) {
+          const frame = Math.floor(world.time * 6 + e.id) % 2;
+          sprite = frame === 0 ? sprite : walk2;
+        }
         const [r, g, b] = sprite ? [1, 1, 1] : e.def.color;
+        const pulse = 1 + 0.05 * Math.sin(world.time * 5 + e.id * 1.7);
         renderer.push({
           x: e.x,
           y: e.y,
-          w: e.def.size,
-          h: e.def.size,
+          w: e.def.size * pulse,
+          h: e.def.size * (2 - pulse),
           r,
           g,
           b,
@@ -392,16 +437,17 @@ startLoop(
 
       const boltUV = renderer.spriteUV("bolt");
       for (const p of world.projectiles) {
+        const uv = renderer.spriteUV(`proj-${p.weaponId}`) ?? boltUV;
         renderer.push({
           x: p.x,
           y: p.y,
           w: p.size,
           h: p.size,
-          r: boltUV ? 1 : 1,
-          g: boltUV ? 1 : 0.95,
-          b: boltUV ? 1 : 0.5,
+          r: uv ? 1 : 1,
+          g: uv ? 1 : 0.95,
+          b: uv ? 1 : 0.5,
           a: 1,
-          uv: boltUV ?? UV.spark,
+          uv: uv ?? UV.spark,
           rot: Math.atan2(p.dy, p.dx) - Math.PI / 2,
         });
       }

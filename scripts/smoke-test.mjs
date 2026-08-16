@@ -44,6 +44,8 @@ try {
   await page.goto(BASE);
   await page.waitForSelector('#menu-overlay.visible button[data-action="play"]');
   await page.click('button[data-action="play"]');
+await page.waitForSelector("[data-weapon]");
+await page.evaluate(() => document.querySelector("[data-weapon]").click());
 
   const dirs = ["d", "s", "a", "w"];
   let dirIndex = 0;

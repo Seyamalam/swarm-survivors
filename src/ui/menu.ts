@@ -168,6 +168,36 @@ export class Menu {
     this.root.classList.add("visible");
   }
 
+  showWeaponSelect(
+    weapons: { id: string; name: string; desc: string }[],
+    onPick: (id: string) => void
+  ) {
+    this.root.innerHTML = `
+      <div class="panel">
+        <h1>Choose Your Weapon</h1>
+        <p>More unlock during the run</p>
+        <div class="cards weapon-grid">
+          ${weapons
+            .map(
+              (w) => `
+            <button class="card" data-weapon="${w.id}">
+              <strong>${w.name}</strong>
+              <span>${w.desc}</span>
+            </button>`
+            )
+            .join("")}
+        </div>
+      </div>`;
+    this.root.classList.add("visible");
+    const handler = (e: Event) => {
+      const el = (e.target as HTMLElement).closest("[data-weapon]");
+      if (!el) return;
+      this.root.removeEventListener("click", handler);
+      onPick(el.getAttribute("data-weapon") ?? "");
+    };
+    this.root.addEventListener("click", handler);
+  }
+
   showDraft(options: DraftCard[], onPick: (index: number) => void) {
     this.root.innerHTML = `
       <div class="panel">

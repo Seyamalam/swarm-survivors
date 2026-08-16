@@ -20,6 +20,8 @@ page.on("pageerror", (e) => console.log("[pageerror]", e.message));
 await page.goto(`${BASE}?speed=${SPEED}`);
 await page.waitForSelector('#menu-overlay.visible button[data-action="play"]');
 await page.click('button[data-action="play"]');
+await page.waitForSelector("[data-weapon]");
+await page.evaluate(() => document.querySelector("[data-weapon]").click());
 
 const KEYS = ["w", "a", "s", "d"];
 const held = new Set();
