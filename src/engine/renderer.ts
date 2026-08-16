@@ -14,8 +14,8 @@ export interface SpriteInstance {
   rot?: number;
 }
 
-const ATLAS_W = 2048;
-const ATLAS_H = 1024;
+const ATLAS_W = 4096;
+const ATLAS_H = 2048;
 const TILE = 256;
 
 function rect(x: number, y: number, w: number, h: number): UVRect {
