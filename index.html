@@ -35,7 +35,11 @@
         display: none;
         align-items: center;
         justify-content: center;
-        background: rgba(6, 8, 12, 0.75);
+        background: radial-gradient(
+          ellipse at center,
+          rgba(11, 14, 20, 0.72) 0%,
+          rgba(6, 8, 12, 0.9) 100%
+        );
         font-family: system-ui, sans-serif;
       }
       #menu-overlay.visible {
@@ -44,6 +48,17 @@
       #menu-overlay .panel {
         text-align: center;
         color: #e6e6e6;
+        animation: rise 0.35s ease-out;
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
       #menu-overlay h1 {
         font-size: 48px;
@@ -56,24 +71,80 @@
       }
       #menu-overlay button {
         display: block;
-        width: 240px;
+        width: 260px;
         margin: 10px auto;
-        padding: 12px 0;
-        font-size: 18px;
+        padding: 13px 0;
+        font-size: 17px;
+        letter-spacing: 0.5px;
         color: #e6e6e6;
         background: #1a2230;
         border: 1px solid #33415c;
-        border-radius: 6px;
+        border-radius: 8px;
         cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          background 0.12s ease,
+          box-shadow 0.12s ease;
       }
       #menu-overlay button:hover {
         background: #253248;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
       }
-      #menu-overlay .logo {
-        background: linear-gradient(135deg, #6fd3ff, #3ddc84 60%, #f5c542);
+      #menu-overlay button.primary {
+        background: linear-gradient(135deg, #1f8f5c, #157347);
+        border-color: #3ddc84;
+        font-weight: 700;
+        box-shadow: 0 0 18px rgba(61, 220, 132, 0.25);
+      }
+      #menu-overlay button.primary:hover {
+        background: linear-gradient(135deg, #25a56a, #188a52);
+        box-shadow: 0 0 26px rgba(61, 220, 132, 0.45);
+      }
+      #menu-overlay .eyebrow {
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #6fd3ff;
+        margin: 0 0 8px;
+      }
+      #menu-overlay h1.logo {
+        font-size: 68px;
+        line-height: 1.05;
+        margin: 0 0 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, #6fd3ff, #3ddc84 55%, #f5c542);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        filter: drop-shadow(0 0 18px rgba(61, 220, 132, 0.35));
+        animation: logoGlow 3s ease-in-out infinite;
+      }
+      @keyframes logoGlow {
+        0%,
+        100% {
+          filter: drop-shadow(0 0 14px rgba(61, 220, 132, 0.28));
+        }
+        50% {
+          filter: drop-shadow(0 0 28px rgba(61, 220, 132, 0.5));
+        }
+      }
+      #menu-overlay .credits {
+        margin: 34px 0 0;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 12px;
+        line-height: 1.7;
+        letter-spacing: 0.4px;
+        color: #8a94a6;
+      }
+      #menu-overlay .credits .team {
+        color: #6fd3ff;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
       }
       #menu-overlay table.stats {
         margin: 0 auto 24px;

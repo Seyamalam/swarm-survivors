@@ -1,8 +1,3 @@
-export interface MenuButton {
-  label: string;
-  action: string;
-}
-
 export interface DraftCard {
   name: string;
   desc: string;
@@ -62,16 +57,20 @@ export class Menu {
   }
 
   showMain(isDesktop: boolean) {
-    const buttons: MenuButton[] = [
-      { label: "Play", action: "play" },
-      { label: "Settings", action: "settings" },
+    const buttons = [
+      `<button class="primary" data-action="play">Play</button>`,
+      `<button data-action="settings">Settings</button>`,
     ];
-    if (isDesktop) buttons.push({ label: "Quit", action: "quit" });
-    this.render(
-      '<span class="logo">Swarm Survivors</span>',
-      "Outlast the swarm. WASD to move — weapons fire themselves.",
-      buttons
-    );
+    if (isDesktop) buttons.push(`<button data-action="quit">Quit</button>`);
+    this.root.innerHTML = `
+      <div class="panel">
+        <p class="eyebrow">Huntrix presents</p>
+        <h1 class="logo">Swarm Survivors</h1>
+        <p>Outlast the swarm. WASD to move — weapons fire themselves.</p>
+        ${buttons.join("")}
+        <p class="credits"><span class="team">Team Huntrix</span><br />Touhidul Alam Seyam · Shafiul Azam Mahin · Chandni Barua Jowthi</p>
+      </div>`;
+    this.root.classList.add("visible");
   }
 
   showPause(stats: RunStats) {
@@ -79,7 +78,7 @@ export class Menu {
       <div class="panel">
         <h1>Paused</h1>
         ${statsHtml(stats)}
-        <button data-action="resume">Resume</button>
+        <button class="primary" data-action="resume">Resume</button>
         <button data-action="settings">Settings</button>
         <button data-action="play">Restart</button>
         <button data-action="menu">Menu</button>
@@ -162,7 +161,7 @@ export class Menu {
         <h1>${title}</h1>
         <p>${subtitle}</p>
         ${statsHtml(stats)}
-        <button data-action="play">Play Again</button>
+        <button class="primary" data-action="play">Play Again</button>
         <button data-action="menu">Menu</button>
       </div>`;
     this.root.classList.add("visible");
@@ -228,15 +227,5 @@ export class Menu {
   hide() {
     this.root.classList.remove("visible");
     this.root.innerHTML = "";
-  }
-
-  private render(title: string, subtitle: string, buttons: MenuButton[]) {
-    this.root.innerHTML = `
-      <div class="panel">
-        <h1>${title}</h1>
-        <p>${subtitle}</p>
-        ${buttons.map((b) => `<button data-action="${b.action}">${b.label}</button>`).join("")}
-      </div>`;
-    this.root.classList.add("visible");
   }
 }
