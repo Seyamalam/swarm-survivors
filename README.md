@@ -85,7 +85,7 @@ Artifacts land in `release/desktop/`. Upload them to the same itch page as downl
 
 ## Team structure
 
-**Team Huntrix** — Touhidul Alam Seyam · Shafiul Azam Mahin · Chandni Barua Jowthi
+**Team Huntrix** — Touhidul Alam Seyam · Shafiul Azam Mahin · Chandni Barua Jowthi · Afrin Sultana Niharika
 
 The codebase is split so each member owns a separable area:
 

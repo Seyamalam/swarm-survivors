@@ -68,7 +68,7 @@ export class Menu {
         <h1 class="logo">Swarm Survivors</h1>
         <p>Outlast the swarm. WASD to move — weapons fire themselves.</p>
         ${buttons.join("")}
-        <p class="credits"><span class="team">Team Huntrix</span><br />Touhidul Alam Seyam · Shafiul Azam Mahin · Chandni Barua Jowthi</p>
+        <p class="credits"><span class="team">Team Huntrix</span><br />Touhidul Alam Seyam · Shafiul Azam Mahin<br />Chandni Barua Jowthi · Afrin Sultana Niharika</p>
       </div>`;
     this.root.classList.add("visible");
   }
