@@ -31,9 +31,9 @@ New to the codebase? Start with **[LEARNING.md](LEARNING.md)** — architecture 
 
 Refreshed automatically on every commit by the pre-commit hook (`scripts/capture-screenshots.mjs`, headless Playwright against the production build). Skip for one commit with `SKIP_SCREENSHOTS=1 git commit ...`.
 
-| Menu                                    | Gameplay                                   |
-| --------------------------------------- | ------------------------------------------ |
-| ![Main menu](docs/screenshots/menu.png) | ![Gameplay](docs/screenshots/gameplay.png) |
+| Menu                                        | Gameplay                                       |
+| ------------------------------------------- | ---------------------------------------------- |
+| ![Main menu](docs/screenshots/menu.png?v=2) | ![Gameplay](docs/screenshots/gameplay.png?v=2) |
 
 ## Quick start
 
