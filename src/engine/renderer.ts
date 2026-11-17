@@ -493,13 +493,6 @@ export class Renderer {
     const gl = this.gl;
     gl.bindVertexArray(this.vao);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.instanceBuffer);
-    gl.bufferSubData(
-      gl.ARRAY_BUFFER,
-      0,
-      this.data,
-      0,
-      this.count * FLOATS_PER_INSTANCE
-    );
     if (this.naive) {
       for (let i = 0; i < this.count; i++) {
         gl.bufferSubData(
@@ -512,6 +505,13 @@ export class Renderer {
         gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 1);
       }
     } else {
+      gl.bufferSubData(
+        gl.ARRAY_BUFFER,
+        0,
+        this.data,
+        0,
+        this.count * FLOATS_PER_INSTANCE
+      );
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, this.count);
     }
     gl.bindVertexArray(null);

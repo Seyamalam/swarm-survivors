@@ -91,7 +91,6 @@ export const PLAYER_SIZE = 34;
 const ORBIT_HIT_COOLDOWN = 0.4;
 const PROJECTILE_LIFE = 1.6;
 const KNOCKBACK_FORCE = 320;
-const MAX_ENEMY_SIZE = 140;
 
 export class World {
   playerX = 0;
@@ -138,6 +137,7 @@ export class World {
   private enemyPool: Enemy[] = [];
   private projectilePool: Projectile[] = [];
   private gemPool: Gem[] = [];
+  private readonly maxEnemySize: number;
 
   constructor(
     private enemyDefs: EnemyDef[],
@@ -150,6 +150,7 @@ export class World {
     this.hp = config.playerMaxHp;
     this.maxHp = config.playerMaxHp;
     this.pickupRadius = config.pickupRadius;
+    this.maxEnemySize = Math.max(...enemyDefs.map((d) => d.size));
     const startWeapon =
       allWeapons.find((w) => w.id === startWeaponId) ?? allWeapons[0];
     this.addWeapon(startWeapon);
@@ -174,9 +175,9 @@ export class World {
 
   stress(count: number) {
     this.godMode = true;
+    const spawnable = this.enemyDefs.filter((d) => !d.boss);
     for (let i = 0; i < count; i++) {
-      const def =
-        this.enemyDefs[Math.floor(Math.random() * (this.enemyDefs.length - 1))];
+      const def = spawnable[Math.floor(Math.random() * spawnable.length)];
       const angle = Math.random() * Math.PI * 2;
       const radius = 300 + Math.random() * 1100;
       const e = this.enemyPool.pop() ?? ({} as Enemy);
@@ -221,8 +222,9 @@ export class World {
     );
 
     this.updateSpawns(dt);
-    this.updateEnemies(dt);
+    this.moveEnemies(dt);
     if (this.useSpatialHash) this.hash.rebuild(this.enemies);
+    this.checkPlayerContact();
     this.separateEnemies();
     this.updateWeapons(dt);
     this.updateProjectiles(dt);
@@ -290,7 +292,7 @@ export class World {
     return e;
   }
 
-  private updateEnemies(dt: number) {
+  private moveEnemies(dt: number) {
     for (const e of this.enemies) {
       const dx = this.playerX - e.x;
       const dy = this.playerY - e.y;
@@ -302,13 +304,15 @@ export class World {
       e.ky *= 1 - Math.min(1, 8 * dt);
       if (e.flash > 0) e.flash = Math.max(0, e.flash - dt * 5);
     }
+  }
 
+  private checkPlayerContact() {
     if (this.invuln <= 0) {
       const touching = this.useSpatialHash
         ? this.hash.queryCircle(
             this.playerX,
             this.playerY,
-            (PLAYER_SIZE + MAX_ENEMY_SIZE) / 2,
+            (PLAYER_SIZE + this.maxEnemySize) / 2,
             this.scratch
           )
         : this.enemies;
@@ -339,7 +343,7 @@ export class World {
     const es = this.enemies;
     if (this.useSpatialHash) {
       for (const a of es) {
-        const radius = (a.def.size + MAX_ENEMY_SIZE) / 2;
+        const radius = (a.def.size + this.maxEnemySize) / 2;
         const neighbors = this.hash.queryCircle(a.x, a.y, radius, this.scratch);
         for (const b of neighbors) {
           if (b.id <= a.id) continue;
@@ -416,7 +420,7 @@ export class World {
               ? this.hash.queryCircle(
                   this.playerX,
                   this.playerY,
-                  s.radius + MAX_ENEMY_SIZE / 2,
+                  s.radius + this.maxEnemySize / 2,
                   this.scratch
                 )
               : this.enemies;
@@ -441,7 +445,7 @@ export class World {
               ? this.hash.queryCircle(
                   ox,
                   oy,
-                  (s.orbSize + MAX_ENEMY_SIZE) / 2,
+                  (s.orbSize + this.maxEnemySize) / 2,
                   this.scratch
                 )
               : this.enemies;
@@ -538,11 +542,10 @@ export class World {
         ? this.hash.queryCircle(
             p.x,
             p.y,
-            p.size / 2 + MAX_ENEMY_SIZE / 2,
+            p.size / 2 + this.maxEnemySize / 2,
             this.scratch
           )
         : this.enemies;
-      let dead = false;
       for (const e of targets) {
         if (p.hitIds.includes(e.id)) continue;
         if (Math.hypot(e.x - p.x, e.y - p.y) < (e.def.size + p.size) / 2) {
@@ -552,12 +555,10 @@ export class World {
             ps[i] = ps[ps.length - 1];
             ps.pop();
             this.projectilePool.push(p);
-            dead = true;
             break;
           }
         }
       }
-      if (dead) continue;
     }
   }
 

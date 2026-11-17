@@ -297,215 +297,10 @@ startLoop(
     renderer.begin(camX, camY);
 
     drawGrid(camX, camY);
-
     if (world) {
       drawArena(world.config.arenaHalfSize);
-
-      for (const w of world.weapons) {
-        if (w.def.type === "aura") {
-          const radius = world.auraRadius(w);
-          renderer.push({
-            x: world.playerX,
-            y: world.playerY,
-            w: radius * 2,
-            h: radius * 2,
-            r: 0.5,
-            g: 0.8,
-            b: 1,
-            a: 0.08,
-            uv: UV.circle,
-          });
-        }
-      }
-
-      const flash =
-        world.invuln > 0 ? 0.45 + 0.35 * Math.sin(world.time * 40) : 1;
-      const playerUV = renderer.spriteUV("player");
-      renderer.push({
-        x: world.playerX,
-        y: world.playerY,
-        w: 44,
-        h: 44,
-        r: playerUV ? 1 : 0.4,
-        g: playerUV ? 1 : 0.85,
-        b: playerUV ? 1 : 1,
-        a: flash,
-        uv: playerUV ?? UV.diamond,
-        rot: world.playerAngle - Math.PI / 2,
-      });
-
-      const barW = 48;
-      const hpFrac = Math.max(0, world.hp / world.maxHp);
-      renderer.push({
-        x: world.playerX,
-        y: world.playerY - 38,
-        w: barW,
-        h: 7,
-        r: 0.2,
-        g: 0.2,
-        b: 0.25,
-        a: 0.9,
-      });
-      renderer.push({
-        x: world.playerX - (barW * (1 - hpFrac)) / 2,
-        y: world.playerY - 38,
-        w: barW * hpFrac,
-        h: 7,
-        r: 0.3,
-        g: 0.9,
-        b: 0.4,
-        a: 1,
-      });
-
-      const gemUVs = GEM_TIERS.map((t) => renderer.spriteUV(t.sprite));
-      for (const g2 of world.gems) {
-        const tier = GEM_TIERS[g2.tier] ?? GEM_TIERS[0];
-        const sprite = gemUVs[g2.tier] ?? gemUVs[0];
-        renderer.push({
-          x: g2.x,
-          y: g2.y,
-          w: tier.size,
-          h: tier.size,
-          r: sprite ? 1 : tier.color[0],
-          g: sprite ? 1 : tier.color[1],
-          b: sprite ? 1 : tier.color[2],
-          a: 1,
-          uv: sprite ?? UV.diamond,
-        });
-      }
-
-      for (const d of world.dying) {
-        const t = d.life / d.maxLife;
-        const sprite = renderer.spriteUV(d.spriteId);
-        const [r, g, b] = sprite ? [1, 1, 1] : d.color;
-        renderer.push({
-          x: d.x,
-          y: d.y,
-          w: d.size * (1 + (1 - t) * 0.5),
-          h: d.size * (1 + (1 - t) * 0.5),
-          r,
-          g,
-          b,
-          a: t * 0.8,
-          uv: sprite ?? UV.circle,
-          rot: d.angle - Math.PI / 2,
-        });
-      }
-
-      for (const e of world.enemies) {
-        const name = enemySpriteName(e.def);
-        let sprite = renderer.spriteUV(name);
-        const walk2 = renderer.spriteUV(`${name}-walk2`);
-        if (sprite && walk2) {
-          const frame = Math.floor(world.time * 6 + e.id) % 2;
-          sprite = frame === 0 ? sprite : walk2;
-        }
-        const [r, g, b] = sprite ? [1, 1, 1] : e.def.color;
-        const pulse = 1 + 0.05 * Math.sin(world.time * 5 + e.id * 1.7);
-        renderer.push({
-          x: e.x,
-          y: e.y,
-          w: e.def.size * pulse,
-          h: e.def.size * (2 - pulse),
-          r,
-          g,
-          b,
-          a: 1,
-          uv: sprite ?? UV.circle,
-          flash: e.flash > 0 ? e.flash / 0.18 : 0,
-          rot: e.angle - Math.PI / 2,
-        });
-      }
-
-      for (const w of world.weapons) {
-        if (w.def.type === "orbit") {
-          for (const orb of world.orbitPositions(w)) {
-            renderer.push({
-              x: orb.x,
-              y: orb.y,
-              w: orb.size,
-              h: orb.size,
-              r: 0.55,
-              g: 0.9,
-              b: 1,
-              a: 0.95,
-              uv: UV.spark,
-            });
-          }
-        }
-      }
-
-      const boltUV = renderer.spriteUV("bolt");
-      for (const p of world.projectiles) {
-        const uv = renderer.spriteUV(`proj-${p.weaponId}`) ?? boltUV;
-        renderer.push({
-          x: p.x,
-          y: p.y,
-          w: p.size,
-          h: p.size,
-          r: uv ? 1 : 1,
-          g: uv ? 1 : 0.95,
-          b: uv ? 1 : 0.5,
-          a: 1,
-          uv: uv ?? UV.spark,
-          rot: Math.atan2(p.dy, p.dx) - Math.PI / 2,
-        });
-      }
-
-      for (const pt of world.particles.items) {
-        const lifeFrac = pt.life / pt.maxLife;
-        renderer.push({
-          x: pt.x,
-          y: pt.y,
-          w: pt.size * lifeFrac,
-          h: pt.size * lifeFrac,
-          r: pt.r,
-          g: pt.g,
-          b: pt.b,
-          a: lifeFrac,
-          uv: pt.uv,
-        });
-      }
-
-      for (const dn of world.dmgNumbers.items) {
-        const digits = String(dn.value);
-        const dw = 13;
-        const dh = 20;
-        const startX = dn.x - (digits.length * dw) / 2;
-        const alpha = Math.min(1, dn.life / (dn.maxLife * 0.5));
-        for (let i = 0; i < digits.length; i++) {
-          renderer.push({
-            x: startX + i * dw + dw / 2,
-            y: dn.y,
-            w: dw,
-            h: dh,
-            r: dn.r,
-            g: dn.g,
-            b: dn.b,
-            a: alpha,
-            uv: UV.digit(Number(digits[i])),
-          });
-        }
-      }
-
-      xpbar.style.width = `${Math.min(100, (world.xp / world.xpNext) * 100)}%`;
-      leveltag.textContent = `Lv ${world.level}`;
-
-      const heapMb = performance.memory
-        ? Math.round(performance.memory.usedJSHeapSize / 1048576)
-        : "?";
-      const vramKb = Math.round(renderer.vramBytes / 1024);
-      const bossText = world.boss
-        ? ` | BOSS: ${Math.ceil(world.boss.hp)}/${world.boss.maxHp}`
-        : "";
-      const modeText = NAIVE_MODE ? " | NAIVE MODE" : "";
-      const line1 = `hp: ${Math.ceil(world.hp)}/${world.maxHp} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s${bossText}${modeText}`;
-      const line2 =
-        `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB · bloom ${renderer.bloomEnabled ? "on" : "off"}` +
-        (desktopMetrics
-          ? ` · cpu ${desktopMetrics.cpuPercent}% · proc-ram ${desktopMetrics.processMemMb}MB · gpu-proc ${desktopMetrics.gpuProcMemMb}MB`
-          : "");
-      hud.innerHTML = `${line1}<br>${line2}<br><span style="opacity:.6">${renderer.gpuName}</span>`;
+      emitWorldSprites(world);
+      updateHud(world);
     }
 
     renderer.flush();
@@ -557,6 +352,231 @@ function drawArena(half: number) {
   renderer.push({ x: 0, y: half, w: half * 2 + t, h: t, ...c });
   renderer.push({ x: -half, y: 0, w: t, h: half * 2 + t, ...c });
   renderer.push({ x: half, y: 0, w: t, h: half * 2 + t, ...c });
+}
+
+function emitWorldSprites(world: World) {
+  drawPlayer(world);
+  drawGems(world);
+  drawEnemies(world);
+  drawWeaponSprites(world);
+  drawVfx(world);
+}
+
+function drawPlayer(world: World) {
+  for (const w of world.weapons) {
+    if (w.def.type === "aura") {
+      const radius = world.auraRadius(w);
+      renderer.push({
+        x: world.playerX,
+        y: world.playerY,
+        w: radius * 2,
+        h: radius * 2,
+        r: 0.5,
+        g: 0.8,
+        b: 1,
+        a: 0.08,
+        uv: UV.circle,
+      });
+    }
+  }
+
+  const flash = world.invuln > 0 ? 0.45 + 0.35 * Math.sin(world.time * 40) : 1;
+  const playerUV = renderer.spriteUV("player");
+  renderer.push({
+    x: world.playerX,
+    y: world.playerY,
+    w: 44,
+    h: 44,
+    r: playerUV ? 1 : 0.4,
+    g: playerUV ? 1 : 0.85,
+    b: playerUV ? 1 : 1,
+    a: flash,
+    uv: playerUV ?? UV.diamond,
+    rot: world.playerAngle - Math.PI / 2,
+  });
+
+  const barW = 48;
+  const hpFrac = Math.max(0, world.hp / world.maxHp);
+  renderer.push({
+    x: world.playerX,
+    y: world.playerY - 38,
+    w: barW,
+    h: 7,
+    r: 0.2,
+    g: 0.2,
+    b: 0.25,
+    a: 0.9,
+  });
+  renderer.push({
+    x: world.playerX - (barW * (1 - hpFrac)) / 2,
+    y: world.playerY - 38,
+    w: barW * hpFrac,
+    h: 7,
+    r: 0.3,
+    g: 0.9,
+    b: 0.4,
+    a: 1,
+  });
+}
+
+function drawGems(world: World) {
+  const gemUVs = GEM_TIERS.map((t) => renderer.spriteUV(t.sprite));
+  for (const g of world.gems) {
+    const tier = GEM_TIERS[g.tier] ?? GEM_TIERS[0];
+    const sprite = gemUVs[g.tier] ?? gemUVs[0];
+    renderer.push({
+      x: g.x,
+      y: g.y,
+      w: tier.size,
+      h: tier.size,
+      r: sprite ? 1 : tier.color[0],
+      g: sprite ? 1 : tier.color[1],
+      b: sprite ? 1 : tier.color[2],
+      a: 1,
+      uv: sprite ?? UV.diamond,
+    });
+  }
+}
+
+function drawEnemies(world: World) {
+  for (const d of world.dying) {
+    const t = d.life / d.maxLife;
+    const sprite = renderer.spriteUV(d.spriteId);
+    const [r, g, b] = sprite ? [1, 1, 1] : d.color;
+    renderer.push({
+      x: d.x,
+      y: d.y,
+      w: d.size * (1 + (1 - t) * 0.5),
+      h: d.size * (1 + (1 - t) * 0.5),
+      r,
+      g,
+      b,
+      a: t * 0.8,
+      uv: sprite ?? UV.circle,
+      rot: d.angle - Math.PI / 2,
+    });
+  }
+
+  for (const e of world.enemies) {
+    const name = enemySpriteName(e.def);
+    let sprite = renderer.spriteUV(name);
+    const walk2 = renderer.spriteUV(`${name}-walk2`);
+    if (sprite && walk2) {
+      const frame = Math.floor(world.time * 6 + e.id) % 2;
+      sprite = frame === 0 ? sprite : walk2;
+    }
+    const [r, g, b] = sprite ? [1, 1, 1] : e.def.color;
+    const pulse = 1 + 0.05 * Math.sin(world.time * 5 + e.id * 1.7);
+    renderer.push({
+      x: e.x,
+      y: e.y,
+      w: e.def.size * pulse,
+      h: e.def.size * (2 - pulse),
+      r,
+      g,
+      b,
+      a: 1,
+      uv: sprite ?? UV.circle,
+      flash: e.flash > 0 ? e.flash / 0.18 : 0,
+      rot: e.angle - Math.PI / 2,
+    });
+  }
+}
+
+function drawWeaponSprites(world: World) {
+  for (const w of world.weapons) {
+    if (w.def.type === "orbit") {
+      for (const orb of world.orbitPositions(w)) {
+        renderer.push({
+          x: orb.x,
+          y: orb.y,
+          w: orb.size,
+          h: orb.size,
+          r: 0.55,
+          g: 0.9,
+          b: 1,
+          a: 0.95,
+          uv: UV.spark,
+        });
+      }
+    }
+  }
+
+  const boltUV = renderer.spriteUV("bolt");
+  for (const p of world.projectiles) {
+    const uv = renderer.spriteUV(`proj-${p.weaponId}`) ?? boltUV;
+    renderer.push({
+      x: p.x,
+      y: p.y,
+      w: p.size,
+      h: p.size,
+      r: 1,
+      g: uv ? 1 : 0.95,
+      b: uv ? 1 : 0.5,
+      a: 1,
+      uv: uv ?? UV.spark,
+      rot: Math.atan2(p.dy, p.dx) - Math.PI / 2,
+    });
+  }
+}
+
+function drawVfx(world: World) {
+  for (const pt of world.particles.items) {
+    const lifeFrac = pt.life / pt.maxLife;
+    renderer.push({
+      x: pt.x,
+      y: pt.y,
+      w: pt.size * lifeFrac,
+      h: pt.size * lifeFrac,
+      r: pt.r,
+      g: pt.g,
+      b: pt.b,
+      a: lifeFrac,
+      uv: pt.uv,
+    });
+  }
+
+  for (const dn of world.dmgNumbers.items) {
+    const digits = String(dn.value);
+    const dw = 13;
+    const dh = 20;
+    const startX = dn.x - (digits.length * dw) / 2;
+    const alpha = Math.min(1, dn.life / (dn.maxLife * 0.5));
+    for (let i = 0; i < digits.length; i++) {
+      renderer.push({
+        x: startX + i * dw + dw / 2,
+        y: dn.y,
+        w: dw,
+        h: dh,
+        r: dn.r,
+        g: dn.g,
+        b: dn.b,
+        a: alpha,
+        uv: UV.digit(Number(digits[i])),
+      });
+    }
+  }
+}
+
+function updateHud(world: World) {
+  xpbar.style.width = `${Math.min(100, (world.xp / world.xpNext) * 100)}%`;
+  leveltag.textContent = `Lv ${world.level}`;
+
+  const heapMb = performance.memory
+    ? Math.round(performance.memory.usedJSHeapSize / 1048576)
+    : "?";
+  const vramKb = Math.round(renderer.vramBytes / 1024);
+  const bossText = world.boss
+    ? ` | BOSS: ${Math.ceil(world.boss.hp)}/${world.boss.maxHp}`
+    : "";
+  const modeText = NAIVE_MODE ? " | NAIVE MODE" : "";
+  const line1 = `hp: ${Math.ceil(world.hp)}/${world.maxHp} | kills: ${world.kills} | enemies: ${world.enemies.length} | sprites: ${renderer.spriteCount} | time: ${world.time.toFixed(1)}s${bossText}${modeText}`;
+  const line2 =
+    `fps: ${fps} · sim 120Hz · update ${avgUpdateMs.toFixed(2)}ms · render ${avgRenderMs.toFixed(2)}ms · main-thread ${busyPct.toFixed(0)}% · heap ${heapMb}MB · gpu-buffers ~${vramKb}KB · bloom ${renderer.bloomEnabled ? "on" : "off"}` +
+    (desktopMetrics
+      ? ` · cpu ${desktopMetrics.cpuPercent}% · proc-ram ${desktopMetrics.processMemMb}MB · gpu-proc ${desktopMetrics.gpuProcMemMb}MB`
+      : "");
+  hud.innerHTML = `${line1}<br>${line2}<br><span style="opacity:.6">${renderer.gpuName}</span>`;
 }
 
 window.__perf = () => ({

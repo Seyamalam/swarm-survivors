@@ -4,6 +4,8 @@
 
 A Vampire Survivors-style horde survival game built with TypeScript + raw WebGL2, made for our computer graphics course. The whole game is a GPU showcase: every sprite drawn in a single instanced draw call, simulation ticking at a fixed 120Hz.
 
+New to the codebase? Start with **[LEARNING.md](LEARNING.md)** — architecture diagrams, file-by-file guide, and how-tos.
+
 **Play now:** [seyamalam.itch.io/swarm-survivors](https://seyamalam.itch.io/swarm-survivors) (HTML5, runs in browser) — or grab desktop builds for Windows/macOS/Linux.
 
 ## Features

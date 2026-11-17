@@ -54,26 +54,4 @@ export class SpatialHash<T extends HashedEntity> {
     }
     return out;
   }
-
-  forEachPair(cb: (a: T, b: T) => void) {
-    const seen = new Set<number>();
-    for (const [k, bucket] of this.cells) {
-      const cx = (k % this.cols) - this.cols / 2;
-      const cy = Math.floor(k / this.cols) - this.cols / 2;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const nk = this.key(cx + dx, cy + dy);
-          if (seen.has(nk)) continue;
-          const other = this.cells.get(nk);
-          if (!other) continue;
-          for (const a of bucket) {
-            for (const b of other) {
-              if (a !== b) cb(a, b);
-            }
-          }
-        }
-      }
-      seen.add(k);
-    }
-  }
 }

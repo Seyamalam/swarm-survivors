@@ -2,6 +2,7 @@
 
 ```
 swarm-survivors/
+├── LEARNING.md                   # Guided tour: tech stack, architecture diagrams, file guide, how-tos
 ├── index.html                    # Page shell: canvas, HUD/XP DOM elements, menu overlay styles
 ├── package.json                  # npm scripts (dev/build/desktop/package/deploy/benchmark) and dev deps
 ├── tsconfig.json                 # Strict TypeScript config for src/
