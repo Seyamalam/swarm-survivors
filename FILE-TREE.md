@@ -24,12 +24,15 @@ swarm-survivors/
 │
 ├── scripts/
 │   ├── capture-screenshots.mjs   # Headless Playwright: builds game, screenshots menu+gameplay for README
+│   ├── build-guide-pdf.mjs       # Renders docs/guide.html → docs/swarm-survivors-guide.pdf via headless Chromium
 │   ├── smoke-test.mjs            # Headless end-to-end playtest: moves, drafts upgrades, asserts loop works
 │   ├── balance-bot.mjs           # Kiting AI bot for automated balance runs (BOT_SPEED/BOT_WALL env)
 │   ├── benchmark.mjs             # naive vs optimized stress benchmark → docs/benchmark.md + .json
 │   └── publish-itch-web.sh       # Butler push of dist/ to the itch.io html5 channel with retries
 │
 ├── docs/
+│   ├── guide.html                # Self-contained study guide (SVG diagrams, print CSS) — source for the PDF
+│   ├── swarm-survivors-guide.pdf # Generated A4 PDF guide (npm run guide:pdf)
 │   ├── screenshots/              # Auto-regenerated README screenshots (menu.png, gameplay.png)
 │   ├── benchmark.md/.json        # naive vs optimized perf report (npm run benchmark)
 │   ├── report.md                 # Technical/grading report: CG techniques + benchmark

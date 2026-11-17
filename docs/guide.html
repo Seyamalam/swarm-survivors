@@ -1,0 +1,2821 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Swarm Survivors — Project Guide &amp; CG Techniques Report</title>
+    <style>
+      :root {
+        --ink: #1a2230;
+        --muted: #5a6474;
+        --line: #d6dce6;
+        --accent: #0e9f6e;
+        --accent2: #2563eb;
+        --bg-soft: #f4f7fb;
+        --code-bg: #eef2f7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body {
+        font-family:
+          -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--ink);
+        margin: 0;
+        font-size: 11pt;
+        line-height: 1.5;
+      }
+      .page {
+        page-break-after: always;
+        padding: 36px 44px;
+        max-width: 780px;
+        margin: 0 auto;
+      }
+      .page:last-child {
+        page-break-after: avoid;
+      }
+
+      h1 {
+        font-size: 30pt;
+        margin: 0 0 6px;
+        letter-spacing: -0.5px;
+      }
+      h2 {
+        font-size: 17pt;
+        margin: 0 0 12px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid var(--accent);
+      }
+      h3 {
+        font-size: 12.5pt;
+        margin: 18px 0 6px;
+        color: var(--accent2);
+      }
+      p {
+        margin: 6px 0;
+      }
+      ul,
+      ol {
+        margin: 6px 0;
+        padding-left: 20px;
+      }
+      li {
+        margin: 3px 0;
+      }
+      code {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 9.5pt;
+        background: var(--code-bg);
+        padding: 1px 5px;
+        border-radius: 3px;
+      }
+      pre {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 8.8pt;
+        background: #101826;
+        color: #d9e4f5;
+        padding: 12px 14px;
+        border-radius: 6px;
+        overflow-x: auto;
+        line-height: 1.45;
+      }
+      pre .c {
+        color: #7c8aa5;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+        font-size: 9.8pt;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 5px 9px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--bg-soft);
+        font-weight: 600;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 9pt;
+      }
+      .callout {
+        background: var(--bg-soft);
+        border-left: 4px solid var(--accent);
+        padding: 10px 14px;
+        margin: 12px 0;
+        border-radius: 0 6px 6px 0;
+      }
+      .callout.blue {
+        border-left-color: var(--accent2);
+      }
+      .say {
+        background: #eefaf3;
+        border: 1px solid #b9e6cf;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 8px 0;
+      }
+      .say::before {
+        content: "SAY IT LIKE THIS — ";
+        font-weight: 700;
+        font-size: 8.5pt;
+        color: var(--accent);
+        letter-spacing: 0.5px;
+      }
+      .qa {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 8px 0;
+        page-break-inside: avoid;
+      }
+      .qa .q {
+        font-weight: 700;
+        color: var(--accent2);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .num {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+        text-align: center;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 50%;
+        font-weight: 700;
+        font-size: 10pt;
+        margin-right: 6px;
+      }
+      svg {
+        display: block;
+        margin: 10px auto;
+        max-width: 100%;
+      }
+      .fig-label {
+        text-align: center;
+        font-size: 8.8pt;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .cover {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 940px;
+      }
+      .cover .logo {
+        font-size: 44pt;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: #0e9f6e;
+        margin: 0;
+      }
+      .cover .logo span {
+        color: #2563eb;
+      }
+      .cover .sub {
+        font-size: 15pt;
+        color: var(--muted);
+        margin: 8px 0 28px;
+      }
+      .badge {
+        display: inline-block;
+        background: var(--bg-soft);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 9.5pt;
+        margin: 3px 4px 3px 0;
+      }
+      .footer-note {
+        margin-top: 40px;
+        font-size: 9pt;
+        color: var(--muted);
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============ COVER ============ -->
+    <div class="page cover">
+      <p class="logo">Swarm <span>Survivors</span></p>
+      <p class="sub">Project Guide &amp; Computer Graphics Techniques Report</p>
+      <p style="font-size: 12pt; max-width: 560px">
+        A Vampire Survivors-style arena roguelike written in TypeScript on raw
+        WebGL2 — no game engine, no framework. Every sprite drawn in a single
+        instanced draw call, simulation at a fixed 120&nbsp;Hz, bloom
+        post-processing, spatial-hash collision, and full object pooling.
+      </p>
+      <p>
+        <span class="badge">TypeScript</span>
+        <span class="badge">WebGL2 (raw)</span>
+        <span class="badge">Vite</span>
+        <span class="badge">Web Audio API</span>
+        <span class="badge">Electron</span>
+        <span class="badge">Playwright</span>
+        <span class="badge">Zero runtime deps</span>
+      </p>
+      <h3>Live</h3>
+      <p>
+        Browser build: <b>seyamalam.itch.io/swarm-survivors</b> &nbsp;·&nbsp;
+        Desktop builds: Windows / macOS / Linux on the same page
+      </p>
+      <h3>Repository scale</h3>
+      <table>
+        <tr>
+          <th>Metric</th>
+          <th>Value</th>
+        </tr>
+        <tr>
+          <td>Game source</td>
+          <td>~2,700 lines of TypeScript across 14 files</td>
+        </tr>
+        <tr>
+          <td>Bundle</td>
+          <td>~48&nbsp;KB JS (~16&nbsp;KB gzipped) — no engine shipped</td>
+        </tr>
+        <tr>
+          <td>Content</td>
+          <td>
+            16 enemy types · 10 weapons × 8 levels · 12 spawn waves · 1 boss
+          </td>
+        </tr>
+        <tr>
+          <td>Simulation</td>
+          <td>Fixed 120&nbsp;Hz, decoupled from render rate</td>
+        </tr>
+        <tr>
+          <td>Tested at</td>
+          <td>10,000 simultaneous enemies (stress benchmark)</td>
+        </tr>
+      </table>
+      <div class="footer-note">
+        Generated from the repository — source of truth: LEARNING.md,
+        docs/benchmark.md, docs/report.md.
+      </div>
+    </div>
+
+    <!-- ============ BIG PICTURE ============ -->
+    <div class="page">
+      <h2>1 · The Big Picture</h2>
+      <p>
+        <b>What it is.</b> You play a lone survivor in a bounded arena. Enemies
+        spawn at the edge of the screen and walk toward you. Weapons fire by
+        themselves — your only job is to move (WASD / arrow keys). Kills drop XP
+        gems; leveling up pauses the game and offers a 3-card upgrade draft.
+        Waves escalate for 10 minutes, then the Hive Tyrant boss spawns. Kill it
+        and you win.
+      </p>
+      <p><b>The end goal — two targets in one project:</b></p>
+      <ol>
+        <li>
+          <b>A finished, shipped game.</b> Live on itch.io in the browser plus
+          packaged Electron builds for all three desktop OSes.
+        </li>
+        <li>
+          <b>A computer-graphics techniques showcase.</b> The renderer,
+          collision, and memory management are deliberately built from scratch
+          on WebGL2 so the classic CG topics — instancing, texture atlases,
+          spatial partitioning, post-processing, fixed-timestep simulation — are
+          all visible in the code and measurable in a benchmark.
+        </li>
+      </ol>
+      <div class="callout">
+        <b>The one-sentence pitch for the demo:</b> "It's a Vampire Survivors
+        clone where we wrote the renderer ourselves — one draw call draws ten
+        thousand sprites, and we have the benchmark proving why that matters."
+      </div>
+      <h3>Tech stack</h3>
+      <table>
+        <tr>
+          <th>Layer</th>
+          <th>Technology</th>
+          <th>Where</th>
+        </tr>
+        <tr>
+          <td>Language</td>
+          <td>TypeScript (strict mode)</td>
+          <td><code>src/</code></td>
+        </tr>
+        <tr>
+          <td>Rendering</td>
+          <td>Raw WebGL2 — instanced sprites + framebuffer post-processing</td>
+          <td><code>src/engine/renderer.ts</code></td>
+        </tr>
+        <tr>
+          <td>Simulation</td>
+          <td>Fixed-timestep loop (120&nbsp;Hz), custom spatial hash</td>
+          <td><code>src/engine/loop.ts</code>, <code>spatial-hash.ts</code></td>
+        </tr>
+        <tr>
+          <td>Audio</td>
+          <td>
+            Web Audio API — synthesized SFX + generative music, zero audio files
+          </td>
+          <td><code>src/audio/audio.ts</code></td>
+        </tr>
+        <tr>
+          <td>UI</td>
+          <td>Plain DOM overlays — no UI framework</td>
+          <td><code>index.html</code>, <code>src/ui/menu.ts</code></td>
+        </tr>
+        <tr>
+          <td>Content</td>
+          <td>Pure JSON data files — enemies, weapons, waves</td>
+          <td><code>src/data/*.json</code></td>
+        </tr>
+        <tr>
+          <td>Art</td>
+          <td>
+            AI-generated PNGs composed into a runtime texture atlas; procedural
+            canvas shapes as fallback
+          </td>
+          <td><code>public/sprites/</code></td>
+        </tr>
+        <tr>
+          <td>Build</td>
+          <td>Vite (dev server + bundler)</td>
+          <td><code>vite.config.ts</code></td>
+        </tr>
+        <tr>
+          <td>Desktop</td>
+          <td>Electron + electron-builder (win/mac/linux)</td>
+          <td><code>electron/</code></td>
+        </tr>
+        <tr>
+          <td>Testing</td>
+          <td>
+            Playwright — smoke playtest, benchmark, screenshots, balance bot
+          </td>
+          <td><code>scripts/</code></td>
+        </tr>
+        <tr>
+          <td>Deploy</td>
+          <td>Butler CLI → itch.io (runs automatically after each commit)</td>
+          <td><code>scripts/publish-itch-web.sh</code></td>
+        </tr>
+      </table>
+      <div class="say">
+        We chose zero-dependency TypeScript-to-WebGL2 on purpose: the assignment
+        is about graphics techniques, so an engine would hide exactly the things
+        we're being graded on.
+      </div>
+    </div>
+
+    <!-- ============ ARCHITECTURE ============ -->
+    <div class="page">
+      <h2>2 · Architecture — three clean layers</h2>
+
+      <svg
+        viewBox="0 0 700 340"
+        width="620"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <defs>
+          <marker
+            id="arr"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,0 L8,4 L0,8 z" fill="#5a6474" />
+          </marker>
+        </defs>
+        <!-- data layer -->
+        <rect
+          x="10"
+          y="20"
+          width="180"
+          height="300"
+          rx="8"
+          fill="#f4f7fb"
+          stroke="#d6dce6"
+        />
+        <text
+          x="100"
+          y="44"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="700"
+          fill="#1a2230"
+        >
+          CONTENT (JSON)
+        </text>
+        <text
+          x="100"
+          y="60"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          no code — designers edit this
+        </text>
+        <rect
+          x="30"
+          y="80"
+          width="140"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="100"
+          y="98"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          enemies.json
+        </text>
+        <text x="100" y="112" text-anchor="middle" font-size="9" fill="#5a6474">
+          16 defs: hp/speed/size/xp
+        </text>
+        <rect
+          x="30"
+          y="136"
+          width="140"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="100"
+          y="154"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          weapons.json
+        </text>
+        <text x="100" y="168" text-anchor="middle" font-size="9" fill="#5a6474">
+          10 weapons × 8 levels
+        </text>
+        <rect
+          x="30"
+          y="192"
+          width="140"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="100"
+          y="210"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          waves.json
+        </text>
+        <text x="100" y="224" text-anchor="middle" font-size="9" fill="#5a6474">
+          12 waves + boss @10:00
+        </text>
+        <rect
+          x="30"
+          y="248"
+          width="140"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="100"
+          y="266"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          sprites/*.png
+        </text>
+        <text x="100" y="280" text-anchor="middle" font-size="9" fill="#5a6474">
+          44 AI-generated tiles
+        </text>
+
+        <!-- game layer -->
+        <rect
+          x="260"
+          y="20"
+          width="180"
+          height="300"
+          rx="8"
+          fill="#eefaf3"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="350"
+          y="44"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="700"
+          fill="#1a2230"
+        >
+          GAME
+        </text>
+        <text
+          x="350"
+          y="60"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          knows vampires, not WebGL
+        </text>
+        <rect
+          x="278"
+          y="80"
+          width="144"
+          height="58"
+          rx="5"
+          fill="#fff"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="350"
+          y="98"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          world.ts
+        </text>
+        <text x="350" y="112" text-anchor="middle" font-size="9" fill="#5a6474">
+          simulation: entities,
+        </text>
+        <text x="350" y="124" text-anchor="middle" font-size="9" fill="#5a6474">
+          spawns, damage, XP, boss
+        </text>
+        <rect
+          x="278"
+          y="150"
+          width="144"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="350"
+          y="168"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          weapons.ts + upgrades.ts
+        </text>
+        <text x="350" y="182" text-anchor="middle" font-size="9" fill="#5a6474">
+          stat merge · 3-card draft
+        </text>
+        <rect
+          x="278"
+          y="206"
+          width="144"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="350"
+          y="224"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          vfx/
+        </text>
+        <text x="350" y="238" text-anchor="middle" font-size="9" fill="#5a6474">
+          particles · damage numbers
+        </text>
+
+        <!-- engine layer -->
+        <rect
+          x="510"
+          y="20"
+          width="180"
+          height="300"
+          rx="8"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="600"
+          y="44"
+          text-anchor="middle"
+          font-size="13"
+          font-weight="700"
+          fill="#1a2230"
+        >
+          ENGINE
+        </text>
+        <text
+          x="600"
+          y="60"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          knows GPUs, not vampires
+        </text>
+        <rect
+          x="528"
+          y="80"
+          width="144"
+          height="58"
+          rx="5"
+          fill="#fff"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="600"
+          y="98"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          renderer.ts
+        </text>
+        <text x="600" y="112" text-anchor="middle" font-size="9" fill="#5a6474">
+          WebGL2 instancing
+        </text>
+        <text x="600" y="124" text-anchor="middle" font-size="9" fill="#5a6474">
+          bloom post pipeline
+        </text>
+        <rect
+          x="528"
+          y="150"
+          width="144"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="600"
+          y="168"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          loop.ts
+        </text>
+        <text x="600" y="182" text-anchor="middle" font-size="9" fill="#5a6474">
+          fixed 120Hz accumulator
+        </text>
+        <rect
+          x="528"
+          y="206"
+          width="144"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="600"
+          y="224"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          spatial-hash.ts
+        </text>
+        <text x="600" y="238" text-anchor="middle" font-size="9" fill="#5a6474">
+          uniform grid index
+        </text>
+        <rect
+          x="528"
+          y="262"
+          width="144"
+          height="44"
+          rx="5"
+          fill="#fff"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="600"
+          y="280"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          input.ts
+        </text>
+        <text x="600" y="294" text-anchor="middle" font-size="9" fill="#5a6474">
+          keys → move axes
+        </text>
+
+        <!-- arrows -->
+        <line
+          x1="192"
+          y1="170"
+          x2="258"
+          y2="170"
+          stroke="#5a6474"
+          stroke-width="1.5"
+          marker-end="url(#arr)"
+        />
+        <line
+          x1="442"
+          y1="170"
+          x2="508"
+          y2="170"
+          stroke="#5a6474"
+          stroke-width="1.5"
+          marker-end="url(#arr)"
+        />
+      </svg>
+      <p class="fig-label">
+        main.ts sits above all three — it reads game state and pushes sprites
+        into the renderer.
+      </p>
+
+      <h3>The dependency rule</h3>
+      <ul>
+        <li>
+          <code>src/engine/</code> — GPU, clock, grid, keyboard.
+          <b>Cannot</b> import from <code>game/</code>.
+        </li>
+        <li>
+          <code>src/game/</code> — enemies, weapons, XP, waves. Knows nothing
+          about WebGL calls.
+        </li>
+        <li>
+          <code>src/main.ts</code> — the only file that knows both: it turns
+          world state into <code>renderer.push()</code> calls and runs the menu
+          state machine.
+        </li>
+        <li>
+          <code>src/data/</code> — pure JSON. Changing game content never
+          requires touching code.
+        </li>
+      </ul>
+      <div class="callout blue">
+        <b>Why it matters:</b> this separation is what lets each team member own
+        a whole layer, and it's why content (enemies/weapons/waves) can be
+        balanced by editing JSON with zero risk of breaking the engine.
+      </div>
+    </div>
+
+    <!-- ============ FRAME LIFECYCLE ============ -->
+    <div class="page">
+      <h2>3 · Anatomy of one frame</h2>
+      <p>
+        The game renders once per <code>requestAnimationFrame</code> but
+        <b>simulates</b> at a fixed 120&nbsp;Hz. Slow frames simply run more sim
+        ticks; fast frames may run none.
+      </p>
+
+      <svg
+        viewBox="0 0 700 300"
+        width="640"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <defs>
+          <marker
+            id="arr2"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,0 L8,4 L0,8 z" fill="#0e9f6e" />
+          </marker>
+        </defs>
+        <rect
+          x="10"
+          y="30"
+          width="130"
+          height="50"
+          rx="6"
+          fill="#f4f7fb"
+          stroke="#d6dce6"
+        />
+        <text
+          x="75"
+          y="50"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          requestAnimationFrame
+        </text>
+        <text x="75" y="65" text-anchor="middle" font-size="9" fill="#5a6474">
+          up to 120+ fps
+        </text>
+        <line
+          x1="140"
+          y1="55"
+          x2="178"
+          y2="55"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr2)"
+        />
+
+        <rect
+          x="180"
+          y="30"
+          width="150"
+          height="50"
+          rx="6"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="255"
+          y="50"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          accumulator += dt
+        </text>
+        <text x="255" y="65" text-anchor="middle" font-size="9" fill="#5a6474">
+          clamped to 250ms max
+        </text>
+        <line
+          x1="330"
+          y1="55"
+          x2="368"
+          y2="55"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr2)"
+        />
+
+        <rect
+          x="370"
+          y="10"
+          width="320"
+          height="90"
+          rx="6"
+          fill="#eefaf3"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="530"
+          y="30"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="700"
+        >
+          while acc ≥ 1/120s → world.update(STEP)
+        </text>
+        <text
+          x="530"
+          y="50"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          spawn → move enemies → rebuild spatial hash →
+        </text>
+        <text
+          x="530"
+          y="64"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          player contact → separation → weapons →
+        </text>
+        <text
+          x="530"
+          y="78"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          projectiles → gems → VFX → reap dead
+        </text>
+
+        <rect
+          x="370"
+          y="130"
+          width="320"
+          height="60"
+          rx="6"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="530"
+          y="152"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          render(): push() every visible entity
+        </text>
+        <text
+          x="530"
+          y="170"
+          text-anchor="middle"
+          font-size="9.5"
+          fill="#5a6474"
+        >
+          player · enemies · gems · orbits · projectiles · particles · digits ·
+          grid
+        </text>
+        <line
+          x1="530"
+          y1="100"
+          x2="530"
+          y2="128"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr2)"
+        />
+
+        <rect
+          x="370"
+          y="210"
+          width="150"
+          height="56"
+          rx="6"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="445"
+          y="232"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          flush()
+        </text>
+        <text x="445" y="248" text-anchor="middle" font-size="9" fill="#5a6474">
+          ONE instanced draw
+        </text>
+        <line
+          x1="530"
+          y1="190"
+          x2="470"
+          y2="208"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr2)"
+        />
+
+        <rect
+          x="540"
+          y="210"
+          width="150"
+          height="56"
+          rx="6"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="615"
+          y="232"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          endFrame()
+        </text>
+        <text x="615" y="248" text-anchor="middle" font-size="9" fill="#5a6474">
+          bloom post pipeline
+        </text>
+        <line
+          x1="520"
+          y1="238"
+          x2="538"
+          y2="238"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr2)"
+        />
+      </svg>
+      <p class="fig-label">
+        Sim ticks (green box) repeat 0..N times per rendered frame. Drawing
+        happens once.
+      </p>
+
+      <h3>What the world does in one tick (120× per second)</h3>
+      <table>
+        <tr>
+          <th>Step</th>
+          <th>What happens</th>
+          <th>Code</th>
+        </tr>
+        <tr>
+          <td>1. Spawns</td>
+          <td>Current wave's interval timer; boss trigger at 10:00</td>
+          <td><code>updateSpawns</code></td>
+        </tr>
+        <tr>
+          <td>2. Move enemies</td>
+          <td>Seek player + knockback decay + hit-flash decay</td>
+          <td><code>moveEnemies</code></td>
+        </tr>
+        <tr>
+          <td>3. Rebuild hash</td>
+          <td>All live enemies re-bucketed into the 96px grid</td>
+          <td><code>hash.rebuild</code></td>
+        </tr>
+        <tr>
+          <td>4. Player contact</td>
+          <td>Touch check → damage, i-frames, knockback, shake</td>
+          <td><code>checkPlayerContact</code></td>
+        </tr>
+        <tr>
+          <td>5. Separation</td>
+          <td>Push overlapping enemies apart so the horde doesn't stack</td>
+          <td><code>separateEnemies</code></td>
+        </tr>
+        <tr>
+          <td>6. Weapons</td>
+          <td>
+            Cooldown timers → fire projectiles / nova / aura tick / orbit orbs
+          </td>
+          <td><code>updateWeapons</code></td>
+        </tr>
+        <tr>
+          <td>7. Projectiles</td>
+          <td>Move, expire, collision → damage + pierce bookkeeping</td>
+          <td><code>updateProjectiles</code></td>
+        </tr>
+        <tr>
+          <td>8. Gems</td>
+          <td>Magnet pull inside pickup radius, collect → XP → level-ups</td>
+          <td><code>updateGems</code></td>
+        </tr>
+        <tr>
+          <td>9. Reap dead</td>
+          <td>
+            hp≤0 enemies → pools, gems, particles, kill count, victory check
+          </td>
+          <td><code>reapDead</code></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ============ STATE MACHINE ============ -->
+    <div class="page">
+      <h2>4 · Game state machine</h2>
+      <p>
+        <code>main.ts</code> owns one string variable, <code>state</code>, that
+        decides what the update/render callbacks are allowed to do.
+        <code>menu.ts</code> draws the DOM overlay for each non-playing state.
+      </p>
+
+      <svg
+        viewBox="0 0 700 320"
+        width="620"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <defs>
+          <marker
+            id="arr3"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,0 L8,4 L0,8 z" fill="#2563eb" />
+          </marker>
+        </defs>
+        <style>
+          .st {
+            fill: #fff;
+            stroke: #2563eb;
+            stroke-width: 1.5;
+          }
+          .stt {
+            font-size: 12px;
+            font-weight: 600;
+            fill: #1a2230;
+          }
+          .lbl {
+            font-size: 9px;
+            fill: #5a6474;
+          }
+        </style>
+        <rect class="st" x="40" y="30" width="110" height="40" rx="8" />
+        <text class="stt" x="95" y="55" text-anchor="middle">menu</text>
+        <rect class="st" x="290" y="30" width="130" height="40" rx="8" />
+        <text class="stt" x="355" y="55" text-anchor="middle">
+          weaponselect
+        </text>
+        <rect class="st" x="560" y="140" width="110" height="40" rx="8" />
+        <text class="stt" x="615" y="165" text-anchor="middle">playing</text>
+        <rect class="st" x="560" y="250" width="110" height="40" rx="8" />
+        <text class="stt" x="615" y="275" text-anchor="middle">paused</text>
+        <rect class="st" x="310" y="250" width="110" height="40" rx="8" />
+        <text class="stt" x="365" y="275" text-anchor="middle">draft</text>
+        <rect class="st" x="60" y="140" width="110" height="40" rx="8" />
+        <text class="stt" x="115" y="165" text-anchor="middle">gameover</text>
+        <rect class="st" x="60" y="250" width="110" height="40" rx="8" />
+        <text class="stt" x="115" y="275" text-anchor="middle">victory</text>
+
+        <line
+          x1="150"
+          y1="50"
+          x2="288"
+          y2="50"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="219" y="42" text-anchor="middle">Play</text>
+        <line
+          x1="420"
+          y1="55"
+          x2="590"
+          y2="140"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="530" y="92" text-anchor="middle">pick weapon</text>
+        <line
+          x1="615"
+          y1="180"
+          x2="615"
+          y2="248"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="645" y="218" text-anchor="middle">ESC</text>
+        <line
+          x1="600"
+          y1="250"
+          x2="600"
+          y2="182"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="572" y="218" text-anchor="middle">Resume</text>
+        <line
+          x1="560"
+          y1="185"
+          x2="420"
+          y2="258"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="462" y="205" text-anchor="middle">level up</text>
+        <line
+          x1="420"
+          y1="262"
+          x2="560"
+          y2="182"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="520" y="240" text-anchor="middle">
+          card picked
+        </text>
+        <line
+          x1="560"
+          y1="165"
+          x2="172"
+          y2="165"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="360" y="158" text-anchor="middle">hp ≤ 0</text>
+        <line
+          x1="590"
+          y1="180"
+          x2="140"
+          y2="255"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="390" y="230" text-anchor="middle">
+          boss killed
+        </text>
+        <line
+          x1="95"
+          y1="140"
+          x2="95"
+          y2="72"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <line
+          x1="135"
+          y1="250"
+          x2="115"
+          y2="72"
+          stroke="#2563eb"
+          stroke-width="1.4"
+          marker-end="url(#arr3)"
+        />
+        <text class="lbl" x="60" y="110" text-anchor="middle">
+          Menu / Play Again
+        </text>
+      </svg>
+      <p class="fig-label">
+        "draft" is interrupt-driven:
+        <code>world.pendingLevels &gt; 0</code> after any tick re-opens it.
+      </p>
+
+      <h3>Run lifecycle in prose</h3>
+      <ol>
+        <li>
+          <b>menu</b> → Play → <b>weaponselect</b> → pick starting weapon →
+          <b>playing</b>
+        </li>
+        <li>
+          During play, any level-up sets <code>pendingLevels</code>; the update
+          callback notices and opens <b>draft</b> (one card pick per pending
+          level — chains if you leveled twice in one tick)
+        </li>
+        <li>ESC toggles <b>paused</b>; pause shows live run stats</li>
+        <li>hp ≤ 0 → <b>gameover</b> with kills/DPS/level/build summary</li>
+        <li>Boss killed → <b>victory</b> with the same stats</li>
+      </ol>
+    </div>
+
+    <!-- ============ INSTANCING ============ -->
+    <div class="page">
+      <h2>5 · CG technique — instanced rendering</h2>
+      <p>
+        <b>The problem.</b> GPUs are fast; <i>telling</i> them what to draw is
+        slow. Every <code>drawArrays</code> call costs CPU-side driver work —
+        state validation, command encoding. Ten thousand sprites drawn one at a
+        time means 10,000 draw calls per frame, and the frame rate collapses no
+        matter how good the GPU is.
+      </p>
+      <p>
+        <b>The fix.</b> WebGL2 instancing draws the same quad N times in
+        <b>one</b> call. Per-sprite data (position, size, color, UV rect,
+        hit-flash, rotation) is packed into a flat <code>Float32Array</code> —
+        14 floats per sprite — uploaded once, and read in the vertex shader via
+        attributes marked <code>vertexAttribDivisor(loc, 1)</code> ("advance
+        once per instance, not per vertex").
+      </p>
+
+      <svg
+        viewBox="0 0 700 250"
+        width="640"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <text
+          x="165"
+          y="24"
+          text-anchor="middle"
+          font-size="12"
+          font-weight="700"
+          fill="#b91c1c"
+        >
+          NAIVE — N draw calls
+        </text>
+        <text
+          x="535"
+          y="24"
+          text-anchor="middle"
+          font-size="12"
+          font-weight="700"
+          fill="#0e9f6e"
+        >
+          INSTANCED — 1 draw call
+        </text>
+        <line
+          x1="350"
+          y1="10"
+          x2="350"
+          y2="240"
+          stroke="#d6dce6"
+          stroke-dasharray="4 3"
+        />
+
+        <rect
+          x="30"
+          y="40"
+          width="120"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="90" y="61" text-anchor="middle" font-size="10">
+          sprite 1 data
+        </text>
+        <rect
+          x="30"
+          y="80"
+          width="120"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="90" y="101" text-anchor="middle" font-size="10">
+          sprite 2 data
+        </text>
+        <rect
+          x="30"
+          y="120"
+          width="120"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="90" y="141" text-anchor="middle" font-size="10">
+          sprite 3 data
+        </text>
+        <text x="90" y="172" text-anchor="middle" font-size="12" fill="#5a6474">
+          ⋮ ×10,000
+        </text>
+        <line
+          x1="150"
+          y1="57"
+          x2="215"
+          y2="57"
+          stroke="#b91c1c"
+          stroke-width="1.4"
+        />
+        <text x="182" y="52" text-anchor="middle" font-size="9" fill="#b91c1c">
+          draw
+        </text>
+        <line
+          x1="150"
+          y1="97"
+          x2="215"
+          y2="97"
+          stroke="#b91c1c"
+          stroke-width="1.4"
+        />
+        <text x="182" y="92" text-anchor="middle" font-size="9" fill="#b91c1c">
+          draw
+        </text>
+        <line
+          x1="150"
+          y1="137"
+          x2="215"
+          y2="137"
+          stroke="#b91c1c"
+          stroke-width="1.4"
+        />
+        <text x="182" y="132" text-anchor="middle" font-size="9" fill="#b91c1c">
+          draw
+        </text>
+        <rect
+          x="220"
+          y="70"
+          width="110"
+          height="70"
+          rx="6"
+          fill="#fef2f2"
+          stroke="#fca5a5"
+        />
+        <text
+          x="275"
+          y="98"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          GPU
+        </text>
+        <text x="275" y="116" text-anchor="middle" font-size="9" fill="#b91c1c">
+          starves between calls
+        </text>
+        <text
+          x="165"
+          y="228"
+          text-anchor="middle"
+          font-size="10"
+          fill="#b91c1c"
+        >
+          ≈ 0 FPS at 10k enemies
+        </text>
+
+        <rect
+          x="395"
+          y="55"
+          width="140"
+          height="105"
+          rx="5"
+          fill="#fff"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="465"
+          y="75"
+          text-anchor="middle"
+          font-size="10"
+          font-weight="600"
+        >
+          Float32Array
+        </text>
+        <text x="465" y="92" text-anchor="middle" font-size="9" fill="#5a6474">
+          [x y w h r g b a
+        </text>
+        <text x="465" y="105" text-anchor="middle" font-size="9" fill="#5a6474">
+          uv.x y w h flash rot]
+        </text>
+        <text x="465" y="122" text-anchor="middle" font-size="9" fill="#5a6474">
+          × 14 floats × N
+        </text>
+        <text x="465" y="148" text-anchor="middle" font-size="9" fill="#0e9f6e">
+          one bufferSubData
+        </text>
+        <line
+          x1="535"
+          y1="107"
+          x2="590"
+          y2="107"
+          stroke="#0e9f6e"
+          stroke-width="2"
+        />
+        <text x="562" y="100" text-anchor="middle" font-size="9" fill="#0e9f6e">
+          1 draw
+        </text>
+        <rect
+          x="595"
+          y="70"
+          width="90"
+          height="75"
+          rx="6"
+          fill="#eefaf3"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="640"
+          y="95"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          GPU
+        </text>
+        <text x="640" y="112" text-anchor="middle" font-size="9" fill="#5a6474">
+          vertex shader
+        </text>
+        <text x="640" y="125" text-anchor="middle" font-size="9" fill="#5a6474">
+          builds N quads
+        </text>
+        <text
+          x="535"
+          y="228"
+          text-anchor="middle"
+          font-size="10"
+          fill="#0e9f6e"
+        >
+          playable at 10k enemies
+        </text>
+      </svg>
+      <p class="fig-label">
+        Same vertex shader either way — the difference is how many times the CPU
+        has to call it.
+      </p>
+
+      <h3>The vertex shader does the camera + rotation</h3>
+      <pre>vec2 corner  = aCorner * aSize;                    <span class="c">// unit quad → sprite size</span>
+vec2 rotated = rotate(corner, aRot);               <span class="c">// per-instance rotation</span>
+vec2 world   = aPos + rotated;                     <span class="c">// world position</span>
+vec2 screen  = (world - uCamera) * uZoom / uResolution * 2.0;
+gl_Position  = vec4(screen.x, -screen.y, 0, 1);    <span class="c">// world → clip space</span></pre>
+      <div class="say">
+        "We batch all sprites into one instanced draw call. Per-instance
+        attributes — position, size, color, UV, flash and rotation — advance
+        once per instance via attribute divisors, so a single
+        drawArraysInstanced call renders the whole scene. CPU overhead per frame
+        becomes one buffer upload and one draw call instead of thousands."
+      </div>
+      <p class="small muted">
+        Code: <code>renderer.ts</code> — <code>push()</code> writes into the
+        Float32Array, <code>flush()</code> uploads once and draws. The buffer
+        doubles in capacity when full.
+      </p>
+    </div>
+
+    <!-- ============ ATLAS ============ -->
+    <div class="page">
+      <h2>6 · CG technique — texture atlas</h2>
+      <p>
+        <b>The problem.</b> Every <code>bindTexture</code> is a GPU state
+        change. Drawing 16 enemy types from 16 separate textures would force
+        re-binds (and break batching).
+      </p>
+      <p>
+        <b>The fix.</b> All art lives in one 4096×2048 atlas texture, built at
+        runtime on a 2D canvas: procedural shapes + a monospace digit font are
+        drawn in a reserved 512×512 block, and AI-generated 256×256 PNGs are
+        painted into the remaining tile slots as they load. Each sprite instance
+        carries a normalized <b>UV rectangle</b> so one bound texture serves
+        everything.
+      </p>
+
+      <svg
+        viewBox="0 0 700 250"
+        width="620"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <rect
+          x="60"
+          y="30"
+          width="280"
+          height="140"
+          fill="#fff"
+          stroke="#33415c"
+          stroke-width="1.5"
+        />
+        <rect
+          x="60"
+          y="30"
+          width="70"
+          height="70"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text x="95" y="60" text-anchor="middle" font-size="9" fill="#2563eb">
+          procedural
+        </text>
+        <text x="95" y="74" text-anchor="middle" font-size="9" fill="#2563eb">
+          512×512
+        </text>
+        <g fill="none" stroke="#94a3b8">
+          <line x1="130" y1="30" x2="130" y2="170" />
+          <line x1="200" y1="30" x2="200" y2="170" />
+          <line x1="270" y1="30" x2="270" y2="170" />
+          <line x1="60" y1="100" x2="340" y2="100" />
+        </g>
+        <g fill="#eefaf3" stroke="#b9e6cf">
+          <rect x="132" y="32" width="66" height="66" />
+          <rect x="202" y="32" width="66" height="66" />
+          <rect x="272" y="32" width="66" height="66" />
+          <rect x="62" y="102" width="66" height="66" />
+          <rect x="132" y="102" width="66" height="66" />
+          <rect x="202" y="102" width="66" height="66" />
+          <rect x="272" y="102" width="66" height="66" />
+        </g>
+        <text
+          x="200"
+          y="200"
+          text-anchor="middle"
+          font-size="10"
+          fill="#5a6474"
+        >
+          4096×2048 atlas — 256px tiles (44 used)
+        </text>
+
+        <rect
+          x="410"
+          y="40"
+          width="250"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="535" y="61" text-anchor="middle" font-size="10">
+          UV rect = (u, v, w, h) normalized 0–1
+        </text>
+        <rect
+          x="410"
+          y="86"
+          width="250"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="535" y="107" text-anchor="middle" font-size="10">
+          fragment shader: texture(atlas, uv)
+        </text>
+        <rect
+          x="410"
+          y="132"
+          width="250"
+          height="34"
+          rx="5"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text x="535" y="153" text-anchor="middle" font-size="10">
+          × vColor tint + vFlash hit-flash
+        </text>
+        <line
+          x1="342"
+          y1="100"
+          x2="408"
+          y2="100"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+        />
+      </svg>
+
+      <h3>Nice details worth mentioning</h3>
+      <ul>
+        <li>
+          <b>Progressive enhancement:</b> if a PNG is missing or still loading,
+          the entity renders as its procedural fallback shape — the game can
+          never break from a missing asset.
+        </li>
+        <li>
+          <b>Walk animation for free:</b> each enemy has a
+          <code>-walk2</code> tile; the render loop alternates frames at
+          6&nbsp;fps offset by enemy id — no animation system needed.
+        </li>
+        <li>
+          <b>Digits in the atlas:</b> damage numbers are just sprites —
+          <code>UV.digit(n)</code> maps a number to its glyph rect, so floating
+          text costs one instanced quad per digit.
+        </li>
+        <li>
+          <b>2px inset</b> on each tile's UV prevents bleeding between neighbors
+          under linear filtering.
+        </li>
+        <li>
+          <b>Per-instance tint:</b> the same white art tints to any color — gems
+          flash rarity colors, enemies flash white on hit via
+          <code>vFlash</code> mixed in the fragment shader.
+        </li>
+      </ul>
+      <div class="say">
+        "All sprites sample one atlas texture, so the whole scene draws with a
+        single bound texture and zero state changes. Per-instance UV rectangles
+        select which tile each quad shows; tint and hit-flash are done
+        per-instance in the fragment shader."
+      </div>
+    </div>
+
+    <!-- ============ SPATIAL HASH ============ -->
+    <div class="page">
+      <h2>7 · CG technique — spatial hashing</h2>
+      <p>
+        <b>The problem.</b> Collision checks are pairwise: "is enemy A touching
+        enemy B?" For N entities that's N²/2 comparisons — at 5,000 enemies,
+        12.5 million distance checks <i>per tick</i>, at 120 ticks per second.
+        Impossible.
+      </p>
+      <p>
+        <b>The fix.</b> Bucket every entity into a uniform grid of 96px cells
+        (<code>SpatialHash</code> maps <code>floor(x/96), floor(y/96)</code> →
+        array). To find an entity's neighbors you only look in the cells its
+        query circle overlaps — a handful of candidates instead of the whole
+        population. Rebuilt from scratch each tick (cheap: one pass over the
+        array).
+      </p>
+
+      <svg
+        viewBox="0 0 700 240"
+        width="640"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <g stroke="#c3d4f5" stroke-width="1">
+          <rect x="60" y="20" width="300" height="200" fill="#fff" />
+          <line x1="120" y1="20" x2="120" y2="220" />
+          <line x1="180" y1="20" x2="180" y2="220" />
+          <line x1="240" y1="20" x2="240" y2="220" />
+          <line x1="300" y1="20" x2="300" y2="220" />
+          <line x1="60" y1="70" x2="360" y2="70" />
+          <line x1="60" y1="120" x2="360" y2="120" />
+          <line x1="60" y1="170" x2="360" y2="170" />
+        </g>
+        <rect
+          x="120"
+          y="70"
+          width="120"
+          height="100"
+          fill="#eefaf3"
+          opacity="0.7"
+        />
+        <circle cx="180" cy="120" r="12" fill="#2563eb" />
+        <circle cx="150" cy="95" r="9" fill="#94a3b8" />
+        <circle cx="215" cy="140" r="9" fill="#94a3b8" />
+        <circle cx="195" cy="90" r="9" fill="#94a3b8" />
+        <circle cx="160" cy="155" r="9" fill="#94a3b8" />
+        <circle cx="70" cy="40" r="9" fill="#e2e8f0" />
+        <circle cx="330" cy="200" r="9" fill="#e2e8f0" />
+        <circle cx="320" cy="45" r="9" fill="#e2e8f0" />
+        <text
+          x="210"
+          y="236"
+          text-anchor="middle"
+          font-size="10"
+          fill="#5a6474"
+        >
+          query circle → only the shaded cells are searched
+        </text>
+
+        <rect
+          x="420"
+          y="40"
+          width="250"
+          height="150"
+          rx="6"
+          fill="#f4f7fb"
+          stroke="#d6dce6"
+        />
+        <text
+          x="545"
+          y="66"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="700"
+        >
+          Cost per query
+        </text>
+        <text x="545" y="90" text-anchor="middle" font-size="10" fill="#b91c1c">
+          naive: check all N entities
+        </text>
+        <text
+          x="545"
+          y="112"
+          text-anchor="middle"
+          font-size="10"
+          fill="#0e9f6e"
+        >
+          hashed: check ~9 cells' contents
+        </text>
+        <text
+          x="545"
+          y="140"
+          text-anchor="middle"
+          font-size="10"
+          fill="#5a6474"
+        >
+          O(n) per tick total instead of O(n²)
+        </text>
+        <text x="545" y="165" text-anchor="middle" font-size="9" fill="#5a6474">
+          rebuilt each tick in one pass
+        </text>
+      </svg>
+
+      <h3>Where it's used</h3>
+      <ul>
+        <li>
+          <b>Enemy separation</b> — each enemy pushes apart neighbors from its
+          own cells
+        </li>
+        <li>
+          <b>Player contact</b> — one query around the player instead of
+          scanning everyone
+        </li>
+        <li>
+          <b>Aura / orbit / projectile hits</b> — each hazard queries only its
+          overlap cells
+        </li>
+      </ul>
+      <p class="small muted">
+        The query radius is padded by the largest enemy size (derived from
+        <code>enemies.json</code> at construction), so a huge boss can never
+        hide in an unchecked cell.
+      </p>
+      <div class="say">
+        "Pairwise collision is O(n²), which dies at a few thousand enemies. We
+        bucket entities into a uniform spatial hash each tick, so every query
+        only inspects the handful of cells its circle overlaps — effectively
+        O(n) and it's why the benchmark scales to 10,000 enemies."
+      </div>
+    </div>
+
+    <!-- ============ POOLING + TIMESTEP ============ -->
+    <div class="page">
+      <h2>8 · CG technique — object pooling &amp; fixed timestep</h2>
+
+      <h3>Object pooling — near-zero garbage collection</h3>
+      <p>
+        At 120 ticks/second a busy game would allocate thousands of short-lived
+        objects per second → frequent GC pauses → visible stutter. Instead, dead
+        entities are pushed onto a <b>freelist</b> and re-initialized on the
+        next spawn:
+      </p>
+      <pre><span class="c">// spawn</span>
+const e = this.enemyPool.pop() ?? ({} as Enemy);   <span class="c">// reuse or create once</span>
+<span class="c">// kill — swap-pop removal keeps the array dense, no splice</span>
+es[i] = es[es.length - 1]; es.pop(); this.enemyPool.push(e);</pre>
+      <ul>
+        <li>Pooled: enemies, projectiles, gems, particles, damage numbers</li>
+        <li>
+          Particles capped at 2,048 · damage numbers at 128 · dying-corpse
+          sprites at 64 — hard caps mean memory and frame cost stay bounded in
+          the worst case
+        </li>
+        <li>
+          Spatial-hash buckets are cleared in place (<code>length = 0</code>),
+          not reallocated
+        </li>
+      </ul>
+
+      <h3>Fixed timestep — same game on every machine</h3>
+      <pre><span class="c">// loop.ts — accumulator pattern</span>
+acc += elapsed;                       <span class="c">// real time since last frame (≤250ms)</span>
+while (acc ≥ STEP) { update(STEP); acc -= STEP; }   <span class="c">// STEP = 1/120s</span>
+render();                             <span class="c">// once, at whatever rate the display wants</span></pre>
+      <div class="grid2">
+        <div class="callout">
+          <b>Why not update per frame?</b> At 60fps a frame is 16.7ms; at 144fps
+          it's 6.9ms. If physics ran per-frame, gameplay speed would depend on
+          your monitor — and a 30fps laptop would literally play slower.
+        </div>
+        <div class="callout blue">
+          <b>The 250ms clamp</b> is the "spiral of death" guard: after a long
+          hitch (tab switch), we catch up at most 30 ticks instead of simulating
+          forever and never rendering again.
+        </div>
+      </div>
+      <div class="say">
+        "Two classic problems, two classic fixes: pooling plus swap-pop removal
+        keeps the hot loop allocation-free so the GC never hitches mid-fight; a
+        fixed-timestep accumulator decouples simulation rate from render rate,
+        so gameplay is identical on every display."
+      </div>
+
+      <h3>Game-feel extras (cheap tricks, big effect)</h3>
+      <ul>
+        <li>
+          <b>Hit-stop:</b> killing a high-XP enemy freezes the sim ~60ms — the
+          hit <i>feels</i> heavy
+        </li>
+        <li>
+          <b>Screen shake:</b> camera offset ∝ shake² — decays smoothly, spikes
+          on player damage/boss
+        </li>
+        <li>
+          <b>Hit-flash:</b> per-instance <code>flash</code> lerps the sprite
+          toward white in-shader
+        </li>
+        <li>
+          <b>Knockback:</b> contact adds a decaying velocity vector (<code
+            >kx, ky</code
+          >) on top of seek movement
+        </li>
+        <li>
+          <b>Squash:</b> enemies subtly pulse (<code
+            >w = size·pulse, h = size·(2−pulse)</code
+          >) so the horde feels alive
+        </li>
+      </ul>
+    </div>
+
+    <!-- ============ BLOOM ============ -->
+    <div class="page">
+      <h2>9 · CG technique — bloom post-processing</h2>
+      <p>
+        The scene isn't drawn to the screen directly — it's rendered into a
+        <b>framebuffer object</b> (FBO, an offscreen texture). Post-processing
+        then treats that image as input to further passes.
+      </p>
+
+      <svg
+        viewBox="0 0 700 210"
+        width="640"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <defs>
+          <marker
+            id="arr4"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,0 L8,4 L0,8 z" fill="#0e9f6e" />
+          </marker>
+        </defs>
+        <rect
+          x="20"
+          y="60"
+          width="120"
+          height="70"
+          rx="6"
+          fill="#eef3fd"
+          stroke="#c3d4f5"
+        />
+        <text
+          x="80"
+          y="88"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          scene → FBO
+        </text>
+        <text x="80" y="105" text-anchor="middle" font-size="9" fill="#5a6474">
+          full res RGBA
+        </text>
+
+        <rect
+          x="200"
+          y="15"
+          width="130"
+          height="55"
+          rx="6"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="265"
+          y="37"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          bright-pass
+        </text>
+        <text x="265" y="53" text-anchor="middle" font-size="9" fill="#5a6474">
+          keep lum &gt; 0.8
+        </text>
+
+        <rect
+          x="200"
+          y="125"
+          width="130"
+          height="55"
+          rx="6"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="265"
+          y="147"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          blur ×4
+        </text>
+        <text x="265" y="163" text-anchor="middle" font-size="9" fill="#5a6474">
+          half-res, ping-pong
+        </text>
+
+        <rect
+          x="400"
+          y="60"
+          width="120"
+          height="70"
+          rx="6"
+          fill="#fff"
+          stroke="#d6dce6"
+        />
+        <text
+          x="460"
+          y="88"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          composite
+        </text>
+        <text x="460" y="105" text-anchor="middle" font-size="9" fill="#5a6474">
+          scene + 0.35·bloom
+        </text>
+
+        <rect
+          x="570"
+          y="60"
+          width="110"
+          height="70"
+          rx="6"
+          fill="#eefaf3"
+          stroke="#b9e6cf"
+        />
+        <text
+          x="625"
+          y="88"
+          text-anchor="middle"
+          font-size="11"
+          font-weight="600"
+        >
+          canvas
+        </text>
+        <text x="625" y="105" text-anchor="middle" font-size="9" fill="#5a6474">
+          glow applied
+        </text>
+
+        <line
+          x1="140"
+          y1="80"
+          x2="198"
+          y2="45"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr4)"
+        />
+        <line
+          x1="265"
+          y1="70"
+          x2="265"
+          y2="123"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr4)"
+        />
+        <line
+          x1="140"
+          y1="110"
+          x2="398"
+          y2="95"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr4)"
+        />
+        <line
+          x1="330"
+          y1="152"
+          x2="430"
+          y2="132"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr4)"
+        />
+        <line
+          x1="520"
+          y1="95"
+          x2="568"
+          y2="95"
+          stroke="#0e9f6e"
+          stroke-width="1.5"
+          marker-end="url(#arr4)"
+        />
+      </svg>
+      <p class="fig-label">
+        Five fullscreen passes: scene, bright, blur H+V (×2), composite.
+      </p>
+
+      <h3>Why it's cheap</h3>
+      <ul>
+        <li>
+          <b>Separable Gaussian:</b> a 2D blur kernel factors into horizontal +
+          vertical 1D passes — 2×5 taps instead of 25 per pixel.
+        </li>
+        <li>
+          <b>Half resolution:</b> blur runs at ¼ the pixels; low-frequency glow
+          doesn't need full res anyway.
+        </li>
+        <li>
+          <b>Ping-pong FBOs:</b> two half-res targets alternate as
+          source/destination — the classic trick for iterative blur without
+          allocating more textures.
+        </li>
+      </ul>
+      <pre><span class="c">// blur fragment shader — 5-tap gaussian weights</span>
+sum = tex(uv)·0.227 + tex(uv±dir·1.384)·0.316 + tex(uv±dir·3.230)·0.070;</pre>
+      <div class="say">
+        "Bloom is a three-stage post pipeline over framebuffer objects:
+        threshold the scene for bright pixels, blur them with a separable
+        Gaussian at half resolution using ping-pong FBOs, then additively
+        composite the glow back over the scene."
+      </div>
+      <p class="small muted">
+        Fallback: if post-program compilation fails the renderer silently
+        disables bloom — the game still runs everywhere. Naive mode disables it
+        for the benchmark.
+      </p>
+    </div>
+
+    <!-- ============ BENCHMARK ============ -->
+    <div class="page">
+      <h2>10 · The benchmark — the proof</h2>
+      <p>
+        <code>npm run benchmark</code> stress-spawns 500→10,000 enemies in god
+        mode and measures both paths. Naive = per-sprite draw calls + O(n²)
+        collision. Optimized = instancing + spatial hash + pooling + bloom.
+        Measured in headless Chromium (SwiftShader software GL), so absolute FPS
+        is CPU-bound — the <b>ratio</b> is the meaningful number.
+      </p>
+
+      <table>
+        <tr>
+          <th>Mode</th>
+          <th>Enemies</th>
+          <th>FPS</th>
+          <th>Update ms</th>
+          <th>Render ms</th>
+        </tr>
+        <tr>
+          <td>naive</td>
+          <td>500</td>
+          <td>39</td>
+          <td>1.69</td>
+          <td>0.16</td>
+        </tr>
+        <tr>
+          <td>naive</td>
+          <td>2,000</td>
+          <td>3</td>
+          <td>261.72</td>
+          <td>0.58</td>
+        </tr>
+        <tr>
+          <td>naive</td>
+          <td>5,000</td>
+          <td>1</td>
+          <td>1,652.16</td>
+          <td>1.24</td>
+        </tr>
+        <tr>
+          <td>naive</td>
+          <td>10,000</td>
+          <td>0</td>
+          <td>5,800.70</td>
+          <td>1.67</td>
+        </tr>
+        <tr>
+          <td><b>optimized</b></td>
+          <td>500</td>
+          <td><b>70</b></td>
+          <td><b>0.52</b></td>
+          <td>0.07</td>
+        </tr>
+        <tr>
+          <td><b>optimized</b></td>
+          <td>2,000</td>
+          <td><b>22</b></td>
+          <td><b>9.15</b></td>
+          <td>0.18</td>
+        </tr>
+        <tr>
+          <td><b>optimized</b></td>
+          <td>5,000</td>
+          <td><b>5</b></td>
+          <td><b>148.67</b></td>
+          <td>0.32</td>
+        </tr>
+        <tr>
+          <td><b>optimized</b></td>
+          <td>10,000</td>
+          <td><b>2</b></td>
+          <td><b>421.98</b></td>
+          <td>0.51</td>
+        </tr>
+      </table>
+
+      <svg
+        viewBox="0 0 700 190"
+        width="620"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="inherit"
+      >
+        <text
+          x="350"
+          y="20"
+          text-anchor="middle"
+          font-size="12"
+          font-weight="700"
+        >
+          Update ms vs enemy count (log scale)
+        </text>
+        <g font-size="9" fill="#5a6474">
+          <text x="115" y="58">500</text>
+          <text x="260" y="58">2,000</text>
+          <text x="405" y="58">5,000</text>
+          <text x="550" y="58">10,000</text>
+        </g>
+        <!-- naive bars (log10: 1.69→0.23, 261→2.42, 1652→3.22, 5800→3.76; scale 40px/decade) -->
+        <g fill="#ef4444">
+          <rect x="85" y="70" width="9" height="80" />
+          <rect x="230" y="70" width="97" height="80" />
+          <rect x="375" y="70" width="129" height="80" />
+          <rect x="520" y="70" width="150" height="80" />
+        </g>
+        <!-- opt bars (0.52→-0.28→0, 9.15→0.96→38, 148.7→2.17→87, 422→2.63→105) -->
+        <g fill="#0e9f6e">
+          <rect x="95" y="70" width="1" height="80" />
+          <rect x="240" y="70" width="38" height="80" />
+          <rect x="385" y="70" width="87" height="80" />
+          <rect x="530" y="70" width="105" height="80" />
+        </g>
+        <g font-size="8.5" fill="#5a6474">
+          <text x="182" y="80">naive: 1.7</text>
+          <text x="330" y="80">261.7</text>
+          <text x="508" y="80">1,652</text>
+          <text x="672" y="80">5,800</text>
+          <text x="182" y="92">opt: 0.5</text>
+          <text x="280" y="92">9.2</text>
+          <text x="474" y="92">148.7</text>
+          <text x="638" y="92">422</text>
+        </g>
+        <line
+          x1="60"
+          y1="150"
+          x2="690"
+          y2="150"
+          stroke="#33415c"
+          stroke-width="1"
+        />
+        <rect x="120" y="165" width="10" height="10" fill="#ef4444" />
+        <text x="135" y="174" font-size="9" fill="#5a6474">naive</text>
+        <rect x="180" y="165" width="10" height="10" fill="#0e9f6e" />
+        <text x="195" y="174" font-size="9" fill="#5a6474">optimized</text>
+      </svg>
+
+      <h3>How to present it</h3>
+      <ol>
+        <li>
+          Show naive mode (<code>?naive</code> URL param or the
+          <code>naive-renderer</code> branch) dying at ~1–2k enemies
+        </li>
+        <li>
+          Show optimized mode holding the same horde, then crank
+          <code>?stress=5000</code>
+        </li>
+        <li>
+          Point at the update-ms column: the <b>sim</b> gap (CPU-side, spatial
+          hash + pooling) is 6–13×; on a real GPU the render gap (draw calls) is
+          the bigger multiplier
+        </li>
+      </ol>
+      <div class="say">
+        "The benchmark isolates each optimization: update-ms shows collision and
+        pooling gains (13× at 10k), render-ms stays flat because instancing
+        makes draw cost independent of sprite count. Naive collapses
+        quadratically — exactly what the theory predicts."
+      </div>
+    </div>
+
+    <!-- ============ GAME SYSTEMS ============ -->
+    <div class="page">
+      <h2>11 · Game systems in 60 seconds</h2>
+
+      <h3>Weapons — 4 mechanics × 10 weapons × 8 levels</h3>
+      <table>
+        <tr>
+          <th>Type</th>
+          <th>Behavior</th>
+          <th>Examples</th>
+        </tr>
+        <tr>
+          <td><code>projectile</code></td>
+          <td>
+            Cooldown → fire N bolts at nearest enemy, fan spread, pierce count
+          </td>
+          <td>Magic Bolt, Fireball, Ice Shard, Poison Dart</td>
+        </tr>
+        <tr>
+          <td><code>nova</code></td>
+          <td>Cooldown → radial burst of N projectiles in all directions</td>
+          <td>Ember Nova, Arc Nova</td>
+        </tr>
+        <tr>
+          <td><code>aura</code></td>
+          <td>
+            Cooldown → damage everything inside radius (spatial-hash query)
+          </td>
+          <td>Frost Aura, Holy Ground</td>
+        </tr>
+        <tr>
+          <td><code>orbit</code></td>
+          <td>
+            N orbs circle the player continuously; per-enemy hit cooldown 0.4s
+          </td>
+          <td>Orbital Blades, Rune Satellites</td>
+        </tr>
+      </table>
+      <p>
+        Level N stats = level-1 block + each subsequent level's
+        <b>delta fields merged on top</b> (<code>weaponStats</code>). Max 4
+        equipped weapons (<code>MAX_WEAPONS</code>).
+      </p>
+
+      <h3>The draft</h3>
+      <p>
+        Level-up → pool = [upgradeable equipped weapons] + [new weapons if &lt;4
+        equipped] + [4 stat boosts: +10% dmg, +8% speed, +25 maxHP, +30% pickup]
+        → pick 3 without replacement → apply → resume. Multiple pending levels
+        chain drafts.
+      </p>
+
+      <h3>Waves &amp; boss</h3>
+      <p>
+        <code>waves.json</code> is a sorted timeline;
+        <code>currentWave()</code> picks the last entry with
+        <code>time ≤ world.time</code>. Spawn timer ticks down by
+        <code>spawnInterval</code>, capped at 350 live enemies. The final wave
+        has <code>"boss": "hive-tyrant"</code> — spawned once via
+        <code>bossSpawned</code> flag; killing it sets
+        <code>victory = true</code>.
+      </p>
+
+      <h3>XP &amp; gems</h3>
+      <ul>
+        <li>
+          Enemies drop a gem worth <code>def.xp</code>; tiers by value: common
+          &lt;3, rare 3–4, epic 5–49, legendary ≥50 (different sizes + sprites)
+        </li>
+        <li>
+          Gems inside <code>pickupRadius</code> (90px, upgradeable) magnet
+          toward the player
+        </li>
+        <li>
+          Level curve: <code>xpNext = 6 + (level−1)·5</code> — linear; extra XP
+          carries over
+        </li>
+      </ul>
+
+      <h3>Survival rules</h3>
+      <ul>
+        <li>
+          Contact damage → 0.5s invulnerability (sprite flicker via
+          <code>flash</code>) + knockback on the attacker
+        </li>
+        <li>
+          Arena is ±2000px bounded; spawns happen just outside the camera view
+          (<code>spawnRadius</code> adapts to zoom)
+        </li>
+        <li>
+          Run stats tracked live: kills, total damage (→DPS), level, build list
+          — shown on pause/game-over/victory
+        </li>
+      </ul>
+    </div>
+
+    <!-- ============ FILE MAP ============ -->
+    <div class="page">
+      <h2>12 · File map — who owns what</h2>
+      <table>
+        <tr>
+          <th>File</th>
+          <th>What it is</th>
+          <th>Owner area</th>
+        </tr>
+        <tr>
+          <td><code>src/engine/renderer.ts</code></td>
+          <td>WebGL2 instanced renderer + atlas + bloom + naive mode</td>
+          <td>M1 engine</td>
+        </tr>
+        <tr>
+          <td><code>src/engine/loop.ts</code></td>
+          <td>120Hz fixed-timestep accumulator + frame timings</td>
+          <td>M1 engine</td>
+        </tr>
+        <tr>
+          <td><code>src/engine/spatial-hash.ts</code></td>
+          <td>Uniform grid for O(1) neighbor queries</td>
+          <td>M1 engine</td>
+        </tr>
+        <tr>
+          <td><code>src/engine/input.ts</code></td>
+          <td>Key state → normalized move axes</td>
+          <td>M1 engine</td>
+        </tr>
+        <tr>
+          <td><code>src/game/world.ts</code></td>
+          <td>
+            Simulation: entities, spawns, damage, XP, boss, pools, juice state
+          </td>
+          <td>M1/M2</td>
+        </tr>
+        <tr>
+          <td><code>src/game/weapons.ts</code></td>
+          <td>Weapon instance + per-level stat merge</td>
+          <td>M2 content</td>
+        </tr>
+        <tr>
+          <td><code>src/game/upgrades.ts</code></td>
+          <td>Draft generation + application</td>
+          <td>M2 content</td>
+        </tr>
+        <tr>
+          <td><code>src/data/*.json</code></td>
+          <td>16 enemies · 10 weapons × 8 lvls · 12 waves — pure content</td>
+          <td>M2 content</td>
+        </tr>
+        <tr>
+          <td><code>src/game/vfx/particles.ts</code></td>
+          <td>Pooled particle bursts (2048 cap)</td>
+          <td>M3 VFX</td>
+        </tr>
+        <tr>
+          <td><code>src/game/vfx/damage-numbers.ts</code></td>
+          <td>Pooled floating damage text (128 cap)</td>
+          <td>M3 VFX</td>
+        </tr>
+        <tr>
+          <td><code>src/audio/audio.ts</code></td>
+          <td>Procedural WebAudio SFX + generative music</td>
+          <td>M3 VFX</td>
+        </tr>
+        <tr>
+          <td><code>src/ui/menu.ts</code></td>
+          <td>All DOM screens: menu/pause/settings/draft/stats</td>
+          <td>M4 UI</td>
+        </tr>
+        <tr>
+          <td><code>index.html</code></td>
+          <td>Canvas + HUD divs + entire UI stylesheet</td>
+          <td>M4 UI</td>
+        </tr>
+        <tr>
+          <td><code>src/main.ts</code></td>
+          <td>
+            Glue: state machine, sprite emission helpers, HUD, perf overlay
+          </td>
+          <td>M1/M4</td>
+        </tr>
+        <tr>
+          <td><code>electron/*.cjs</code></td>
+          <td>Desktop wrapper: window, validated IPC, real CPU/RAM metrics</td>
+          <td>M1 engine</td>
+        </tr>
+        <tr>
+          <td><code>scripts/*.mjs</code></td>
+          <td>
+            Playwright smoke test, benchmark, balance bot, screenshots, itch
+            deploy
+          </td>
+          <td>tooling</td>
+        </tr>
+      </table>
+      <p class="small muted">
+        Full per-file one-liners also live in <code>FILE-TREE.md</code>; the
+        deep-dive guide with more diagrams is <code>LEARNING.md</code>.
+      </p>
+
+      <h3>Reading order for a newcomer</h3>
+      <ol>
+        <li><code>loop.ts</code> (30 lines) — the heartbeat</li>
+        <li><code>types.ts</code> + the JSON files — the vocabulary</li>
+        <li><code>world.ts</code> — the simulation, top to bottom</li>
+        <li><code>renderer.ts</code> — where sprites become GPU work</li>
+        <li><code>main.ts</code> — how a frame is assembled</li>
+      </ol>
+    </div>
+
+    <!-- ============ PER-MEMBER TALKING POINTS ============ -->
+    <div class="page">
+      <h2>13 · How to explain your part (by team role)</h2>
+
+      <div class="callout">
+        <b>M1 — Engine core</b> (<code>src/engine/</code>,
+        <code>world.ts</code>, electron)
+      </div>
+      <ul>
+        <li>
+          Lead with <b>instanced rendering</b>: one
+          <code>drawArraysInstanced</code> call draws the whole scene;
+          per-instance data via attribute divisors. Then the <b>benchmark</b>.
+        </li>
+        <li>
+          Then <b>spatial hash</b> (O(n²)→O(n)) and <b>pooling</b> (freelist +
+          swap-pop, no GC in the hot loop).
+        </li>
+        <li>
+          Then <b>fixed timestep</b> (deterministic gameplay at any refresh
+          rate) and <b>bloom</b> (FBO pipeline) if asked about post-processing.
+        </li>
+      </ul>
+      <div class="say">
+        "The engine batch-draws everything: 14 floats per sprite in one buffer,
+        one upload, one draw call. Collision uses a rebuilt-per-tick spatial
+        hash, and every entity type is pooled so the 120Hz loop allocates
+        nothing."
+      </div>
+
+      <div class="callout">
+        <b>M2 — Content &amp; balance</b> (<code>src/data/</code>, weapons,
+        upgrades)
+      </div>
+      <ul>
+        <li>
+          Explain <b>content-as-data</b>: enemies/weapons/waves are JSON; the
+          engine reads defs without knowing what's in them. Add a boss by
+          writing 8 lines of JSON.
+        </li>
+        <li>
+          Explain the <b>stat-merge trick</b>: level 1 is a full block, levels
+          2–8 are deltas — easy to author, easy to balance.
+        </li>
+        <li>
+          Mention the <b>balance bot</b> (<code>scripts/balance-bot.mjs</code>):
+          a kiting AI plays automated runs to sanity-check difficulty numbers.
+        </li>
+      </ul>
+      <div class="say">
+        "Content lives in JSON so balancing never touches engine code. Weapon
+        levels are stored as deltas merged onto the base stats, and we tuned the
+        numbers with an automated kiting bot that plays the game headlessly."
+      </div>
+
+      <div class="callout">
+        <b>M3 — VFX &amp; juice</b> (<code>vfx/</code>, audio, shake/hit-stop)
+      </div>
+      <ul>
+        <li>
+          <b>Particles + damage numbers are pooled sprites</b> — same instanced
+          pipeline as enemies, zero extra draw calls. Digits are atlas glyphs.
+        </li>
+        <li>
+          <b>Game feel = cheap math:</b> hit-stop freezes sim time ~60ms on
+          elite kills; shake scales quadratically and decays; knockback is a
+          decaying velocity added to seek motion.
+        </li>
+        <li>
+          <b>Procedural audio:</b> every SFX is an oscillator sweep or filtered
+          noise burst; music is a 16-step generative loop — no audio files at
+          all.
+        </li>
+      </ul>
+      <div class="say">
+        "All the juice rides the same instanced renderer — particles, damage
+        digits, hit-flash are just sprites with lifetimes. Sound is fully
+        synthesized with the Web Audio API, so the game ships zero audio
+        assets."
+      </div>
+
+      <div class="callout">
+        <b>M4 — UI &amp; menus</b> (<code>menu.ts</code>, index.html, HUD)
+      </div>
+      <ul>
+        <li>
+          UI is a <b>DOM overlay</b>, not in-canvas: a single
+          <code>#menu-overlay</code> div whose <code>innerHTML</code> is rebuilt
+          per screen, buttons wired via <code>data-action</code> delegation.
+        </li>
+        <li>
+          The <b>state machine</b> in main.ts decides which screen shows; the
+          draft screen is driven by <code>pendingLevels</code> so
+          multi-level-ups queue naturally.
+        </li>
+        <li>
+          <b>Live HUD/perf overlay:</b> fps, update/render ms, heap, GPU name,
+          VRAM estimate — and on desktop, real CPU/RAM via Electron's
+          <code>app.getAppMetrics()</code>.
+        </li>
+      </ul>
+      <div class="say">
+        "Menus are plain DOM over the WebGL canvas — no UI framework needed. A
+        small state machine in main.ts swaps overlay screens, and the HUD
+        doubles as a live performance overlay showing frame timings, heap and
+        GPU info."
+      </div>
+    </div>
+
+    <!-- ============ VIVA Q&A ============ -->
+    <div class="page">
+      <h2>14 · Likely questions — and the answers</h2>
+
+      <div class="qa">
+        <p class="q">"Why is one draw call better than many?"</p>
+        <p>
+          Every draw call costs fixed CPU-side driver overhead — validating
+          state and encoding commands. The GPU is fast enough to draw 10k quads
+          instantly; it starves waiting for the CPU to ask. Instancing moves the
+          per-sprite variation into a buffer the GPU reads itself, so CPU cost
+          per frame is constant regardless of sprite count.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"What is instancing, exactly?"</p>
+        <p>
+          Drawing the same geometry N times in one call. Per-instance attributes
+          (marked with <code>vertexAttribDivisor = 1</code>) advance once per
+          instance instead of per vertex — that's how each quad gets its own
+          position, size, color, UV, flash and rotation.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"Why a texture atlas?"</p>
+        <p>
+          Texture binds are GPU state changes that break batching. With one
+          atlas, every sprite samples the same bound texture and differs only by
+          UV rect — zero binds inside the frame. Bonus: the same white sprite
+          art is tinted per-instance, so one image serves every color.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">
+          "Explain the spatial hash." / "Why not just check all pairs?"
+        </p>
+        <p>
+          All-pairs is O(n²): 5k enemies → 12.5M checks per tick. The hash
+          buckets entities into a uniform grid, so a query only inspects the
+          cells its circle overlaps — near-constant candidates. Rebuilt every
+          tick in O(n). It's the same idea as a hash map but keyed on grid
+          position.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"What do you mean by object pooling?"</p>
+        <p>
+          Instead of <code>new</code>/<code>delete</code> per spawn, dead
+          objects go onto a freelist and get re-initialized. Removal uses
+          swap-pop (copy last element over the hole) so arrays stay dense
+          without splicing. Result: no allocation in the 120Hz hot loop → no GC
+          pauses.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"Why a fixed timestep?"</p>
+        <p>
+          Physics scaled by real frame-time makes gameplay speed depend on the
+          monitor's refresh rate. The accumulator runs sim in fixed 1/120s steps
+          regardless of render rate — 60Hz and 240Hz displays get identical
+          gameplay. The 250ms clamp prevents death-spiraling after a hitch.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"Walk me through bloom."</p>
+        <p>
+          Render scene to an FBO → bright-pass keeps pixels over a luminance
+          threshold → Gaussian blur them at half resolution (separable:
+          horizontal then vertical passes, ping-ponging between two FBOs) →
+          additively composite over the original. Cheap because separable blur
+          is 2n taps not n², and at half-res it's ¼ the pixels.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"What's an FBO?"</p>
+        <p>
+          A framebuffer object — a GPU render target backed by a texture instead
+          of the screen. You draw into it like the normal framebuffer, then bind
+          its texture as input to another pass. It's the foundation of all
+          post-processing.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"Why WebGL2 over WebGL1 or Canvas2D?"</p>
+        <p>
+          WebGL2 gives us instanced drawing (<code>drawArraysInstanced</code>),
+          vertex array objects, and GLSL ES 3.00 — the features the renderer is
+          built on. Canvas2D would push every sprite through the CPU rasterizer;
+          it dies far earlier than even naive WebGL.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"How does enemy AI work?"</p>
+        <p>
+          Deliberately simple — seek: normalize(player − enemy) × speed × dt,
+          plus a decaying knockback velocity on top. The swarm <i>feel</i> comes
+          from separation (hash-based neighbor push-apart), not from smarter
+          individual AI.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"How is audio done with no files?"</p>
+        <p>
+          SFX are oscillator frequency-sweeps and filtered noise bursts; music
+          is a setInterval-driven 16-step sequencer layering kick, bass and
+          random arpeggio. A per-name millisecond throttle stops sounds from
+          stacking into clipping.
+        </p>
+      </div>
+
+      <div class="qa">
+        <p class="q">"What would you do next?"</p>
+        <p>
+          Meta-progression (persistent unlocks), more stages/characters,
+          texture-array or sprite-sheet animation instead of 2-frame flip, enemy
+          projectiles, and quadtrees if enemy sizes diverged wildly. All
+          explicitly out of scope for this assignment.
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ DEMO SCRIPT ============ -->
+    <div class="page">
+      <h2>15 · Demo script &amp; cheat sheet</h2>
+
+      <h3>The 3-minute demo narrative</h3>
+      <ol>
+        <li>
+          <span class="num">1</span><b>Play 30 seconds normally.</b> Point at
+          the HUD perf line: fps, update/render ms, sprite count — it's live
+          telemetry, not debug clutter.
+        </li>
+        <li>
+          <span class="num">2</span><b>Show the level-up draft</b> — weapons
+          upgrade via JSON deltas; mention content-as-data while the cards are
+          on screen.
+        </li>
+        <li>
+          <span class="num">3</span><b>Show naive mode dying:</b>
+          <code>?naive&stress=2000</code> — slideshow. This is what most student
+          projects ship.
+        </li>
+        <li>
+          <span class="num">4</span><b>Show optimized at 10k:</b>
+          <code>?stress=10000</code> — same machine, playable. The delta IS the
+          assignment.
+        </li>
+        <li>
+          <span class="num">5</span><b>Close on the benchmark table</b> —
+          update-ms column is theory-made-visible: O(n²) vs O(n).
+        </li>
+      </ol>
+
+      <h3>Useful URL parameters (live demo tools)</h3>
+      <table>
+        <tr>
+          <th>Param</th>
+          <th>Effect</th>
+        </tr>
+        <tr>
+          <td><code>?naive</code></td>
+          <td>Per-sprite draws + O(n²) collision + no bloom (the "before")</td>
+        </tr>
+        <tr>
+          <td><code>?stress=5000</code></td>
+          <td>God mode + instantly spawn N enemies</td>
+        </tr>
+        <tr>
+          <td><code>?speed=4</code></td>
+          <td>Sim runs 4× fast (great for skipping to late waves)</td>
+        </tr>
+        <tr>
+          <td>ESC</td>
+          <td>Pause menu with live run stats</td>
+        </tr>
+        <tr>
+          <td>F11</td>
+          <td>Fullscreen</td>
+        </tr>
+      </table>
+
+      <h3>30-second elevator answer</h3>
+      <div class="callout">
+        "Swarm Survivors is a Vampire Survivors-style horde game we built in
+        TypeScript directly on WebGL2 — no engine. Every sprite in the game
+        renders in a single instanced draw call off a procedurally-built texture
+        atlas; collision runs on a per-tick spatial hash; entities are pooled so
+        the 120Hz simulation never triggers the GC; and bloom is a
+        separable-blur FBO pipeline. We benchmarked naive versus optimized at up
+        to 10,000 enemies — the optimized path is ~13× faster on simulation and
+        stays flat on render."
+      </div>
+
+      <h3>If you only memorize five numbers</h3>
+      <table>
+        <tr>
+          <th>Number</th>
+          <th>What it is</th>
+        </tr>
+        <tr>
+          <td><b>1</b></td>
+          <td>draw call per frame for the entire scene</td>
+        </tr>
+        <tr>
+          <td><b>14</b></td>
+          <td>floats per sprite instance in the GPU buffer</td>
+        </tr>
+        <tr>
+          <td><b>120 Hz</b></td>
+          <td>fixed simulation rate, decoupled from display</td>
+        </tr>
+        <tr>
+          <td><b>96 px</b></td>
+          <td>spatial-hash cell size (≈ typical enemy diameter)</td>
+        </tr>
+        <tr>
+          <td><b>13×</b></td>
+          <td>sim speedup vs naive at 10,000 enemies</td>
+        </tr>
+      </table>
+
+      <div class="footer-note">
+        Sources: LEARNING.md · FILE-TREE.md · docs/benchmark.md · docs/report.md
+        · README.md
+      </div>
+    </div>
+  </body>
+</html>
